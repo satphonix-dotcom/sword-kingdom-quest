@@ -13,6 +13,7 @@ interface Question {
   question: string;
   correct_answer: string;
   options: string[];
+  level: number;
 }
 
 interface QuizFormProps {
@@ -78,7 +79,8 @@ export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
       quiz_id: quizData.id,
       question: q.question,
       correct_answer: q.correct_answer,
-      options: q.options
+      options: q.options,
+      level: q.level
     }));
 
     const { error: questionsError } = await supabase
