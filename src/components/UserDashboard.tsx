@@ -17,6 +17,8 @@ interface Profile {
   points: number;
   id: string;
   country: string | null;
+  first_name: string | null;
+  last_name: string | null;
 }
 
 export const UserDashboard = ({ userId }: { userId: string }) => {
