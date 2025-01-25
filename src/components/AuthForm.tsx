@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -52,6 +53,7 @@ export const AuthForm = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [country, setCountry] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
@@ -59,6 +61,16 @@ export const AuthForm = () => {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (isSignUp && !acceptedTerms) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must accept the terms and conditions to create an account.",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -169,6 +181,22 @@ export const AuthForm = () => {
             required
             className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
           />
+          {isSignUp && (
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="terms"
+                checked={acceptedTerms}
+                onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                className="border-white/30 data-[state=checked]:bg-gameGold data-[state=checked]:text-gamePurple"
+              />
+              <label
+                htmlFor="terms"
+                className="text-sm text-gray-300 cursor-pointer"
+              >
+                I accept the terms and conditions
+              </label>
+            </div>
+          )}
         </div>
 
         <Button
