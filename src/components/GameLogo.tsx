@@ -4,7 +4,7 @@ export const GameLogo = () => {
   return (
     <div className="flex flex-col items-center animate-fade-in">
       <img
-        src="/lovable-uploads/514b8838-f7f8-4938-adc6-12e45621f17f.png"
+        src="/lovable-uploads/f77ed799-492e-4d30-a56c-591a8e002821.png"
         alt="Game of Sword Kings Logo"
         className="w-32 h-32 mb-4 drop-shadow-[0_0_15px_rgba(255,215,0,0.5)] filter-none"
         style={{
