@@ -4,6 +4,7 @@ export interface Question {
   correct_answer: string;
   options: string[];
   level: number;
+  quiz_id: string;
 }
 
 export interface QuizFormProps {

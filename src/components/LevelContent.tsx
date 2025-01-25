@@ -3,17 +3,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Question } from "@/types/quiz";
 
 interface LevelContentProps {
   level: number;
   onBack: () => void;
-}
-
-interface Question {
-  id: string;
-  question: string;
-  options: string[];
-  correct_answer: string;
 }
 
 export const LevelContent = ({ level, onBack }: LevelContentProps) => {
@@ -44,7 +38,17 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
       return;
     }
 
-    setQuestions(data || []);
+    // Transform the data to match our Question interface
+    const transformedQuestions: Question[] = (data || []).map(q => ({
+      id: q.id,
+      question: q.question,
+      correct_answer: q.correct_answer,
+      options: Array.isArray(q.options) ? q.options : [],
+      level: q.level,
+      quiz_id: q.quiz_id
+    }));
+
+    setQuestions(transformedQuestions);
   };
 
   const handleAnswerSelect = (answer: string) => {
