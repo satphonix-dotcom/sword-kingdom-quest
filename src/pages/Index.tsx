@@ -7,7 +7,8 @@ import { Story } from "@/components/Story";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useGame } from "@/hooks/use-game";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { LevelContent } from "@/components/LevelContent";
 
 const Index = () => {
   const { gameStarted, setGameStarted, userId, handleLogout } = useGame();
@@ -16,10 +17,10 @@ const Index = () => {
 
   const handleLevelSelect = (level: number) => {
     setSelectedLevel(level);
-    toast({
-      title: `Level ${level} Selected`,
-      description: "This feature is coming soon! Stay tuned.",
-    });
+  };
+
+  const handleBackToLevels = () => {
+    setSelectedLevel(null);
   };
 
   return (
@@ -43,34 +44,41 @@ const Index = () => {
         {/* Main Content */}
         <div className="max-w-6xl mx-auto space-y-8">
           {gameStarted ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <LevelButton
-                level={1}
-                title="The Basics"
-                description="Master the fundamentals"
-                points={100}
-                onClick={() => handleLevelSelect(1)}
+            selectedLevel ? (
+              <LevelContent 
+                level={selectedLevel} 
+                onBack={handleBackToLevels}
               />
-              <LevelButton
-                level={2}
-                title="Advanced Concepts"
-                description="Dive deeper into complexity"
-                points={200}
-                onClick={() => handleLevelSelect(2)}
-                isLocked={true}
-              />
-              <LevelButton
-                level={3}
-                title="Expert Challenges"
-                description="Test your mastery"
-                points={300}
-                onClick={() => handleLevelSelect(3)}
-                isLocked={true}
-              />
-              <div className="md:col-span-2 lg:col-span-3">
-                <Leaderboard />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <LevelButton
+                  level={1}
+                  title="The Basics"
+                  description="Master the fundamentals"
+                  points={100}
+                  onClick={() => handleLevelSelect(1)}
+                />
+                <LevelButton
+                  level={2}
+                  title="Advanced Concepts"
+                  description="Dive deeper into complexity"
+                  points={200}
+                  onClick={() => handleLevelSelect(2)}
+                  isLocked={true}
+                />
+                <LevelButton
+                  level={3}
+                  title="Expert Challenges"
+                  description="Test your mastery"
+                  points={300}
+                  onClick={() => handleLevelSelect(3)}
+                  isLocked={true}
+                />
+                <div className="md:col-span-2 lg:col-span-3">
+                  <Leaderboard />
+                </div>
               </div>
-            </div>
+            )
           ) : (
             <div className="space-y-8">
               <Story />
