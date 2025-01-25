@@ -7,20 +7,7 @@ import { CsvUpload } from "./CsvUpload";
 import { QuestionsList } from "./QuestionsList";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-export interface Question {
-  id: string;
-  question: string;
-  correct_answer: string;
-  options: string[];
-  level: number;
-}
-
-interface QuizFormProps {
-  userId: string | null;
-  onSuccess: () => void;
-  onCancel: () => void;
-}
+import { Question, QuizFormProps } from "@/types/quiz";
 
 export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
   const { toast } = useToast();

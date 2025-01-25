@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Question } from "./QuizForm";
+import { Question } from "@/types/quiz";
 
 interface CsvUploadProps {
   onQuestionsImported: (questions: Question[]) => void;

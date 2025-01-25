@@ -3,14 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface Question {
-  id: string;
-  question: string;
-  correct_answer: string;
-  options: string[];
-  level: number;
-}
+import { Question } from "@/types/quiz";
 
 interface QuestionFormProps {
   onAddQuestion: (question: Question) => void;
@@ -33,7 +26,6 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
       return;
     }
 
-    // Create a new array with all options including the correct answer
     const allOptions = [...options, correctAnswer].sort(() => Math.random() - 0.5);
 
     onAddQuestion({

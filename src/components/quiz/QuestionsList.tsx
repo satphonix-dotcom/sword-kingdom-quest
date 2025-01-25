@@ -1,10 +1,4 @@
-interface Question {
-  id: string;
-  question: string;
-  correct_answer: string;
-  options: string[];
-  level: number;
-}
+import { Question } from "@/types/quiz";
 
 interface QuestionsListProps {
   questions: Question[];
