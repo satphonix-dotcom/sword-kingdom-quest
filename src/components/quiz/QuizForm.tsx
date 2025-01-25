@@ -119,12 +119,12 @@ export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
 
           const [question, correctAnswer, ...options] = row.split(',').map(item => item.trim());
           
-          if (question && correctAnswer && options.length >= 3) {
+          if (question && correctAnswer && options.length >= 4) {
             newQuestions.push({
               id: Math.random().toString(),
               question,
               correct_answer: correctAnswer,
-              options: [...options, correctAnswer].sort(() => Math.random() - 0.5)
+              options: [...options.slice(0, 4), correctAnswer].sort(() => Math.random() - 0.5)
             });
           }
         }
@@ -183,7 +183,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
           Upload CSV
         </label>
         <span className="text-sm text-muted-foreground">
-          CSV Format: question, correct_answer, option1, option2, option3
+          CSV Format: question, correct_answer, option1, option2, option3, option4
         </span>
       </div>
 
