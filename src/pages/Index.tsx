@@ -12,25 +12,25 @@ const Index = () => {
   const { gameStarted, setGameStarted, userId, handleLogout } = useGame();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate p-4">
+      <div className="container mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <GameLogo className="w-48 h-auto" />
+          <GameLogo className="w-48" />
           {userId && (
             <Button
               variant="ghost"
               className="text-gameGold hover:text-gameGold/80"
               onClick={handleLogout}
             >
-              <LogOut className="mr-2" />
+              <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </Button>
           )}
         </div>
 
         {/* Main Content */}
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-8">
           {gameStarted ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <LevelButton
@@ -56,10 +56,10 @@ const Index = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-12">
+            <div className="space-y-8">
               <Story />
               {userId && <UserDashboard userId={userId} />}
-              <div className="flex flex-col items-center space-y-8 animate-fade-in">
+              <div className="flex flex-col items-center space-y-4 animate-fade-in">
                 <Button
                   onClick={() => setGameStarted(true)}
                   className="bg-gameGold text-gamePurple hover:bg-gameGold/90 text-lg px-8 py-4"
