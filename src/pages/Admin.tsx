@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import { QuizManager } from "@/components/QuizManager";
-import { LogOut, Mail, Globe, Trophy, Calendar } from "lucide-react";
+import { LogOut, Mail, Globe, Trophy, Calendar, User } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -156,6 +156,7 @@ const Admin = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>User Details</TableHead>
+                  <TableHead>Personal Info</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Stats</TableHead>
                   <TableHead>Dates</TableHead>
@@ -175,6 +176,16 @@ const Admin = () => {
                         <Badge variant={profile.is_admin ? "default" : "secondary"}>
                           {profile.is_admin ? 'Admin' : 'User'}
                         </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4" />
+                        <span>
+                          {profile.first_name || profile.last_name
+                            ? `${profile.first_name || ''} ${profile.last_name || ''}`
+                            : 'Not specified'}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>

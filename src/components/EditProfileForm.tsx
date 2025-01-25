@@ -15,6 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 interface EditProfileFormProps {
   profile: {
     username: string;
+    first_name: string | null;
+    last_name: string | null;
     country: string | null;
   };
   userId: string;
@@ -29,6 +31,8 @@ export const EditProfileForm = ({
   onCancel,
 }: EditProfileFormProps) => {
   const [username, setUsername] = useState(profile.username);
+  const [firstName, setFirstName] = useState(profile.first_name || "");
+  const [lastName, setLastName] = useState(profile.last_name || "");
   const [country, setCountry] = useState(profile.country || "");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -42,6 +46,8 @@ export const EditProfileForm = ({
         .from("profiles")
         .update({
           username,
+          first_name: firstName,
+          last_name: lastName,
           country,
           updated_at: new Date().toISOString(),
         })
@@ -78,6 +84,30 @@ export const EditProfileForm = ({
           onChange={(e) => setUsername(e.target.value)}
           className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
           required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="firstName" className="text-sm font-medium text-gray-200">
+          First Name
+        </label>
+        <Input
+          id="firstName"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="lastName" className="text-sm font-medium text-gray-200">
+          Last Name
+        </label>
+        <Input
+          id="lastName"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
         />
       </div>
 

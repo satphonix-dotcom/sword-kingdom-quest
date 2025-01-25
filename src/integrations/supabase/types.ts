@@ -14,8 +14,10 @@ export type Database = {
           avatar_url: string | null
           country: string | null
           created_at: string
+          first_name: string | null
           id: string
           is_admin: boolean | null
+          last_name: string | null
           points: number
           updated_at: string
           username: string | null
@@ -24,8 +26,10 @@ export type Database = {
           avatar_url?: string | null
           country?: string | null
           created_at?: string
+          first_name?: string | null
           id: string
           is_admin?: boolean | null
+          last_name?: string | null
           points?: number
           updated_at?: string
           username?: string | null
@@ -34,8 +38,10 @@ export type Database = {
           avatar_url?: string | null
           country?: string | null
           created_at?: string
+          first_name?: string | null
           id?: string
           is_admin?: boolean | null
+          last_name?: string | null
           points?: number
           updated_at?: string
           username?: string | null
