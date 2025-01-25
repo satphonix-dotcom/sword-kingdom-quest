@@ -2,7 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 interface LevelButtonProps {
-  level: string;
+  level: number | string;
   difficulty: string;
   onClick: () => void;
   isLocked?: boolean;
@@ -23,7 +23,7 @@ export const LevelButton = ({ level, difficulty, onClick, isLocked = false }: Le
     >
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="text-xl font-bold">{level}</h3>
+          <h3 className="text-xl font-bold">Level {level}</h3>
           <p className="text-sm text-gameGold">{difficulty}</p>
         </div>
         {isLocked && (

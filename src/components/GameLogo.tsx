@@ -1,8 +1,13 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 
-export const GameLogo = () => {
+interface GameLogoProps {
+  className?: string;
+}
+
+export const GameLogo = ({ className }: GameLogoProps) => {
   return (
-    <div className="flex flex-col items-center animate-fade-in">
+    <div className={cn("flex flex-col items-center animate-fade-in", className)}>
       <img
         src="/lovable-uploads/f77ed799-492e-4d30-a56c-591a8e002821.png"
         alt="Game of Sword Kings Logo"
