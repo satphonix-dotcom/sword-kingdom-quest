@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { GameLogo } from "@/components/GameLogo";
 import { LevelButton } from "@/components/LevelButton";
 import { Leaderboard } from "@/components/Leaderboard";
+import { UserDashboard } from "@/components/UserDashboard";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,6 +11,7 @@ import { LogOut, Scroll, Crown, Sword, Shield } from "lucide-react";
 const Index = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const { toast } = useToast();
+  const user = supabase.auth.getUser();
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -83,6 +85,7 @@ const Index = () => {
         {!gameStarted ? (
           <div className="space-y-12">
             <Story />
+            {user && <UserDashboard userId={user.id} />}
             <div className="flex flex-col items-center space-y-8 animate-fade-in">
               <Button
                 onClick={() => setGameStarted(true)}
