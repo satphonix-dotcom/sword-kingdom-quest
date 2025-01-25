@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { QuestionForm } from "./QuestionForm";
-import { CsvUpload } from "./CsvUpload";
-import { QuestionsList } from "./QuestionsList";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Question, QuizFormProps } from "@/types/quiz";
+import { QuizMetadata } from "./QuizMetadata";
+import { QuizQuestions } from "./QuizQuestions";
+import { QuizActions } from "./QuizActions";
 
 export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
   const { toast } = useToast();
@@ -93,29 +90,20 @@ export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
 
   return (
     <div className="space-y-4 p-4 border rounded-lg">
-      <Input
-        placeholder="Quiz Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+      <QuizMetadata
+        title={title}
+        description={description}
+        onTitleChange={setTitle}
+        onDescriptionChange={setDescription}
       />
-      <Textarea
-        placeholder="Quiz Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
+      <QuizQuestions 
+        questions={questions}
+        onQuestionsChange={setQuestions}
       />
-
-      <CsvUpload onQuestionsImported={(newQuestions) => setQuestions(prev => [...prev, ...newQuestions])} />
-
-      <QuestionForm onAddQuestion={(question) => setQuestions([...questions, question])} />
-
-      <QuestionsList questions={questions} />
-
-      <div className="flex justify-end gap-2 mt-4">
-        <Button variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button onClick={handleCreateQuiz}>Create Quiz</Button>
-      </div>
+      <QuizActions 
+        onCancel={onCancel}
+        onSubmit={handleCreateQuiz}
+      />
     </div>
   );
 };
