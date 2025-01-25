@@ -140,6 +140,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          time_limit: number | null
           title: string
           updated_at: string
         }
@@ -148,6 +149,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          time_limit?: number | null
           title: string
           updated_at?: string
         }
@@ -156,6 +158,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          time_limit?: number | null
           title?: string
           updated_at?: string
         }

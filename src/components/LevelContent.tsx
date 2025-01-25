@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Question } from "@/types/quiz";
 
 interface LevelContentProps {
@@ -17,12 +18,58 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [isQuizComplete, setIsQuizComplete] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [quizTimeLimit, setQuizTimeLimit] = useState<number>(30); // Default 30 minutes
 
   React.useEffect(() => {
     fetchQuestions();
   }, [level]);
 
+  React.useEffect(() => {
+    if (timeLeft === null || isQuizComplete) return;
+
+    if (timeLeft <= 0) {
+      handleQuizComplete();
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => (prev !== null ? prev - 1 : null));
+      
+      // Show warning when 1 minute remaining
+      if (timeLeft === 60) {
+        toast({
+          title: "Time running out!",
+          description: "You have 1 minute remaining",
+          variant: "destructive",
+        });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, isQuizComplete]);
+
   const fetchQuestions = async () => {
+    const { data: quizData, error: quizError } = await supabase
+      .from("quizzes")
+      .select("time_limit")
+      .eq("id", questions[0]?.quiz_id)
+      .single();
+
+    if (quizError) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch quiz details",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (quizData?.time_limit) {
+      setQuizTimeLimit(quizData.time_limit);
+      setTimeLeft(quizData.time_limit * 60); // Convert minutes to seconds
+    }
+
     const { data, error } = await supabase
       .from("questions")
       .select("*")
@@ -55,6 +102,29 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
     setSelectedAnswer(answer);
   };
 
+  const handleQuizComplete = async () => {
+    setIsQuizComplete(true);
+    
+    // Save quiz response
+    const { error } = await supabase.from("quiz_responses").insert({
+      quiz_id: questions[0].quiz_id,
+      user_id: (await supabase.auth.getUser()).data.user?.id,
+      answers: questions.map((q, i) => ({
+        question_id: q.id,
+        selected_answer: i === currentQuestionIndex ? selectedAnswer : null
+      })),
+      score: score + (selectedAnswer === questions[currentQuestionIndex]?.correct_answer ? 1 : 0)
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save quiz response",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleNextQuestion = async () => {
     if (!selectedAnswer) return;
 
@@ -66,31 +136,17 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
     }
 
     if (currentQuestionIndex === questions.length - 1) {
-      // Quiz complete
-      setIsQuizComplete(true);
-      
-      // Save quiz response
-      const { error } = await supabase.from("quiz_responses").insert({
-        quiz_id: currentQuestion.quiz_id,
-        user_id: (await supabase.auth.getUser()).data.user?.id,
-        answers: questions.map((q, i) => ({
-          question_id: q.id,
-          selected_answer: i === currentQuestionIndex ? selectedAnswer : null
-        })),
-        score: score + (isCorrect ? 1 : 0)
-      });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: "Failed to save quiz response",
-          variant: "destructive",
-        });
-      }
+      handleQuizComplete();
     } else {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedAnswer(null);
     }
+  };
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   if (questions.length === 0) {
@@ -117,6 +173,17 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
             Question {currentQuestionIndex + 1} of {questions.length}
           </span>
         </CardTitle>
+        {timeLeft !== null && !isQuizComplete && (
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Time Remaining:</span>
+              <span className={`font-mono ${timeLeft <= 60 ? 'text-red-500' : ''}`}>
+                {formatTime(timeLeft)}
+              </span>
+            </div>
+            <Progress value={(timeLeft / (quizTimeLimit * 60)) * 100} />
+          </div>
+        )}
       </CardHeader>
       <CardContent className="p-6">
         {isQuizComplete ? (
