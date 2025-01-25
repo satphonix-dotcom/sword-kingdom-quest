@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,19 @@ export const QuizManager = () => {
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchCurrentUser();
+    fetchQuizzes();
+  }, []);
+
+  const fetchCurrentUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setUserId(user.id);
+    }
+  };
 
   const fetchQuizzes = async () => {
     const { data, error } = await supabase
@@ -51,6 +64,15 @@ export const QuizManager = () => {
   };
 
   const handleCreateQuiz = async () => {
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "User not authenticated",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!title.trim()) {
       toast({
         title: "Error",
@@ -71,7 +93,11 @@ export const QuizManager = () => {
 
     const { data: quizData, error: quizError } = await supabase
       .from("quizzes")
-      .insert([{ title, description }])
+      .insert({
+        title,
+        description,
+        created_by: userId
+      })
       .select()
       .single();
 
