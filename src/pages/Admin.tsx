@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import { QuizManager } from "@/components/QuizManager";
-import { LogOut } from "lucide-react";
+import { LogOut, Mail, Globe, Trophy, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -106,6 +107,16 @@ const Admin = () => {
     return null;
   }
 
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
@@ -140,33 +151,69 @@ const Admin = () => {
         loading ? (
           <p>Loading...</p>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Username</TableHead>
-                <TableHead>Admin Status</TableHead>
-                <TableHead>Created At</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {profiles.map((profile) => (
-                <TableRow key={profile.id}>
-                  <TableCell>{profile.username || 'No username'}</TableCell>
-                  <TableCell>{profile.is_admin ? 'Yes' : 'No'}</TableCell>
-                  <TableCell>{new Date(profile.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Button
-                      variant={profile.is_admin ? "destructive" : "default"}
-                      onClick={() => toggleAdminStatus(profile.id, profile.is_admin)}
-                    >
-                      {profile.is_admin ? 'Remove Admin' : 'Make Admin'}
-                    </Button>
-                  </TableCell>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User Details</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Stats</TableHead>
+                  <TableHead>Dates</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {profiles.map((profile) => (
+                  <TableRow key={profile.id}>
+                    <TableCell>
+                      <div className="flex flex-col space-y-1">
+                        <span className="font-medium">{profile.username || 'No username'}</span>
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Mail className="h-4 w-4 mr-1" />
+                          <span>{profile.id}</span>
+                        </div>
+                        <Badge variant={profile.is_admin ? "default" : "secondary"}>
+                          {profile.is_admin ? 'Admin' : 'User'}
+                        </Badge>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Globe className="h-4 w-4" />
+                        <span>{profile.country || 'Not specified'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2">
+                        <Trophy className="h-4 w-4" />
+                        <span>{profile.points} points</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col space-y-1">
+                        <div className="flex items-center text-sm">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span>Created: {formatDate(profile.created_at)}</span>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Updated: {formatDate(profile.updated_at)}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant={profile.is_admin ? "destructive" : "default"}
+                        onClick={() => toggleAdminStatus(profile.id, profile.is_admin)}
+                        className="w-full"
+                      >
+                        {profile.is_admin ? 'Remove Admin' : 'Make Admin'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )
       ) : (
         <QuizManager />
