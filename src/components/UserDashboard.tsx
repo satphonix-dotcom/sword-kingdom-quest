@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { User, Star, Award, Edit2 } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Card,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EditProfileForm } from "./EditProfileForm";
+import { DashboardStats } from "./dashboard/DashboardStats";
 
 interface Profile {
   username: string;
@@ -24,7 +25,11 @@ interface Profile {
 export const UserDashboard = ({ userId }: { userId: string }) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const { data: profile, isLoading: profileLoading, refetch: refetchProfile } = useQuery({
+  const {
+    data: profile,
+    isLoading: profileLoading,
+    refetch: refetchProfile,
+  } = useQuery({
     queryKey: ["profile", userId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -90,42 +95,12 @@ export const UserDashboard = ({ userId }: { userId: string }) => {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Profile</CardTitle>
-            <User className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{profile?.username}</div>
-            <CardDescription>
-              {profile?.country ? `From ${profile.country}` : "Your game profile"}
-            </CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Points</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{profile?.points}</div>
-            <CardDescription>Total points earned</CardDescription>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Global Rank</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">#{leaderboardPosition}</div>
-            <CardDescription>Your position on the leaderboard</CardDescription>
-          </CardContent>
-        </Card>
-      </div>
+      {profile && leaderboardPosition && (
+        <DashboardStats
+          profile={profile}
+          leaderboardPosition={leaderboardPosition}
+        />
+      )}
     </div>
   );
 };
