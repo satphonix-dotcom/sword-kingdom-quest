@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { Question } from "@/types/quiz";
+import { QuizTimer } from "./quiz/QuizTimer";
+import { QuizQuestion } from "./quiz/QuizQuestion";
+import { QuizComplete } from "./quiz/QuizComplete";
 
 interface LevelContentProps {
   level: number;
@@ -19,13 +21,13 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
   const [score, setScore] = useState(0);
   const [isQuizComplete, setIsQuizComplete] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [quizTimeLimit, setQuizTimeLimit] = useState<number>(30); // Default 30 minutes
+  const [quizTimeLimit, setQuizTimeLimit] = useState<number>(30);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchQuestions();
   }, [level]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (timeLeft === null || isQuizComplete) return;
 
     if (timeLeft <= 0) {
@@ -35,15 +37,6 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
 
     const timer = setInterval(() => {
       setTimeLeft(prev => (prev !== null ? prev - 1 : null));
-      
-      // Show warning when 1 minute remaining
-      if (timeLeft === 60) {
-        toast({
-          title: "Time running out!",
-          description: "You have 1 minute remaining",
-          variant: "destructive",
-        });
-      }
     }, 1000);
 
     return () => clearInterval(timer);
@@ -67,7 +60,7 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
 
     if (quizData?.time_limit) {
       setQuizTimeLimit(quizData.time_limit);
-      setTimeLeft(quizData.time_limit * 60); // Convert minutes to seconds
+      setTimeLeft(quizData.time_limit * 60);
     }
 
     const { data, error } = await supabase
@@ -85,7 +78,6 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
       return;
     }
 
-    // Transform the data to match our Question interface
     const transformedQuestions: Question[] = (data || []).map(q => ({
       id: q.id,
       question: q.question,
@@ -105,7 +97,6 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
   const handleQuizComplete = async () => {
     setIsQuizComplete(true);
     
-    // Save quiz response
     const { error } = await supabase.from("quiz_responses").insert({
       quiz_id: questions[0].quiz_id,
       user_id: (await supabase.auth.getUser()).data.user?.id,
@@ -143,12 +134,6 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
     }
   };
 
-  const formatTime = (seconds: number): string => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
   if (questions.length === 0) {
     return (
       <Card className="w-full max-w-2xl mx-auto mt-8">
@@ -174,55 +159,30 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
           </span>
         </CardTitle>
         {timeLeft !== null && !isQuizComplete && (
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-500">Time Remaining:</span>
-              <span className={`font-mono ${timeLeft <= 60 ? 'text-red-500' : ''}`}>
-                {formatTime(timeLeft)}
-              </span>
-            </div>
-            <Progress value={(timeLeft / (quizTimeLimit * 60)) * 100} />
-          </div>
+          <QuizTimer
+            timeLeft={timeLeft}
+            quizTimeLimit={quizTimeLimit}
+            isQuizComplete={isQuizComplete}
+            onTimeUp={handleQuizComplete}
+          />
         )}
       </CardHeader>
       <CardContent className="p-6">
         {isQuizComplete ? (
-          <div className="text-center space-y-4">
-            <h3 className="text-2xl font-bold">Quiz Complete!</h3>
-            <p className="text-xl">
-              Your score: {score} out of {questions.length}
-            </p>
-            <Button onClick={onBack} className="mt-4">
-              Return to Levels
-            </Button>
-          </div>
+          <QuizComplete
+            score={score}
+            totalQuestions={questions.length}
+            onBack={onBack}
+          />
         ) : (
-          <div className="space-y-4">
-            <p className="text-lg font-medium mb-4">{currentQuestion.question}</p>
-            <div className="space-y-2">
-              {currentQuestion.options.map((option, index) => (
-                <Button
-                  key={index}
-                  variant={selectedAnswer === option ? "default" : "outline"}
-                  className="w-full justify-start text-left"
-                  onClick={() => handleAnswerSelect(option)}
-                >
-                  {option}
-                </Button>
-              ))}
-            </div>
-            <div className="flex justify-between mt-6">
-              <Button variant="outline" onClick={onBack}>
-                Exit Quiz
-              </Button>
-              <Button
-                onClick={handleNextQuestion}
-                disabled={!selectedAnswer}
-              >
-                {currentQuestionIndex === questions.length - 1 ? "Finish" : "Next"}
-              </Button>
-            </div>
-          </div>
+          <QuizQuestion
+            question={currentQuestion}
+            selectedAnswer={selectedAnswer}
+            onAnswerSelect={handleAnswerSelect}
+            onNext={handleNextQuestion}
+            onBack={onBack}
+            isLastQuestion={currentQuestionIndex === questions.length - 1}
+          />
         )}
       </CardContent>
     </Card>
