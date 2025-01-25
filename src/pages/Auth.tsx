@@ -2,8 +2,9 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
+import { Home } from "lucide-react";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -49,6 +50,13 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate flex items-center justify-center p-4">
+      <Link 
+        to="/" 
+        className="absolute top-4 left-4 text-gameGold hover:text-gameGold/80 flex items-center gap-2"
+      >
+        <Home className="w-5 h-5" />
+        <span>Return Home</span>
+      </Link>
       <div className="w-full max-w-md space-y-8 bg-white/10 p-8 rounded-lg backdrop-blur-sm">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gameGold">
