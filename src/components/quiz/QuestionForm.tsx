@@ -30,11 +30,14 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
       return;
     }
 
+    // Create a new array with all options including the correct answer
+    const allOptions = [...options, correctAnswer].sort(() => Math.random() - 0.5);
+
     onAddQuestion({
       id: Math.random().toString(),
       question: currentQuestion,
       correct_answer: correctAnswer,
-      options: options
+      options: allOptions
     });
 
     setCurrentQuestion("");
@@ -50,11 +53,15 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
         value={currentQuestion}
         onChange={(e) => setCurrentQuestion(e.target.value)}
       />
-      <Input
-        placeholder="Correct Answer"
-        value={correctAnswer}
-        onChange={(e) => setCorrectAnswer(e.target.value)}
-      />
+      <div className="space-y-2">
+        <Input
+          placeholder="Correct Answer"
+          value={correctAnswer}
+          onChange={(e) => setCorrectAnswer(e.target.value)}
+          className="border-green-500"
+        />
+        <p className="text-sm text-muted-foreground">This will be shuffled with other options</p>
+      </div>
       {options.map((option, index) => (
         <Input
           key={index}
