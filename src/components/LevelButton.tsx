@@ -3,12 +3,21 @@ import { cn } from "@/lib/utils";
 
 interface LevelButtonProps {
   level: number | string;
-  difficulty: string;
-  onClick: () => void;
+  title: string;
+  description: string;
+  points: number;
+  onClick?: () => void;
   isLocked?: boolean;
 }
 
-export const LevelButton = ({ level, difficulty, onClick, isLocked = false }: LevelButtonProps) => {
+export const LevelButton = ({ 
+  level, 
+  title,
+  description,
+  points,
+  onClick, 
+  isLocked = false 
+}: LevelButtonProps) => {
   return (
     <button
       onClick={onClick}
@@ -24,7 +33,9 @@ export const LevelButton = ({ level, difficulty, onClick, isLocked = false }: Le
       <div className="flex justify-between items-center">
         <div>
           <h3 className="text-xl font-bold">Level {level}</h3>
-          <p className="text-sm text-gameGold">{difficulty}</p>
+          <p className="text-sm text-gameGold">{title}</p>
+          <p className="text-xs text-gray-300">{description}</p>
+          <p className="text-xs text-gameGold mt-1">{points} points</p>
         </div>
         {isLocked && (
           <span className="text-2xl">🔒</span>
