@@ -44,6 +44,7 @@ export type Database = {
           correct_answer: string
           created_at: string
           id: string
+          level: number
           options: Json
           question: string
           quiz_id: string
@@ -53,6 +54,7 @@ export type Database = {
           correct_answer: string
           created_at?: string
           id?: string
+          level?: number
           options: Json
           question: string
           quiz_id: string
@@ -62,6 +64,7 @@ export type Database = {
           correct_answer?: string
           created_at?: string
           id?: string
+          level?: number
           options?: Json
           question?: string
           quiz_id?: string

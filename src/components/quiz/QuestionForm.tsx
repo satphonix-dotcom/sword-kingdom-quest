@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Question {
   id: string;
   question: string;
   correct_answer: string;
   options: string[];
+  level: number;
 }
 
 interface QuestionFormProps {
@@ -19,6 +21,7 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
+  const [level, setLevel] = useState<number>(1);
 
   const handleAddQuestion = () => {
     if (!currentQuestion.trim() || !correctAnswer.trim() || options.some(opt => !opt.trim())) {
@@ -37,22 +40,41 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
       id: Math.random().toString(),
       question: currentQuestion,
       correct_answer: correctAnswer,
-      options: allOptions
+      options: allOptions,
+      level
     });
 
     setCurrentQuestion("");
     setCorrectAnswer("");
     setOptions(["", "", "", ""]);
+    setLevel(1);
   };
 
   return (
     <div className="space-y-4">
       <h3 className="font-semibold">Add Questions</h3>
-      <Input
-        placeholder="Question"
-        value={currentQuestion}
-        onChange={(e) => setCurrentQuestion(e.target.value)}
-      />
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <Input
+            placeholder="Question"
+            value={currentQuestion}
+            onChange={(e) => setCurrentQuestion(e.target.value)}
+          />
+        </div>
+        <Select
+          value={level.toString()}
+          onValueChange={(value) => setLevel(parseInt(value))}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select Level" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="1">Level 1 (Beginner)</SelectItem>
+            <SelectItem value="2">Level 2 (Intermediate)</SelectItem>
+            <SelectItem value="3">Level 3 (Advanced)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       <div className="space-y-2">
         <Input
           placeholder="Correct Answer"
