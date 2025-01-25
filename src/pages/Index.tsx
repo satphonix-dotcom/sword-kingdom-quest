@@ -2,14 +2,40 @@ import React, { useState } from "react";
 import { GameLogo } from "@/components/GameLogo";
 import { LevelButton } from "@/components/LevelButton";
 import { Leaderboard } from "@/components/Leaderboard";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { LogOut } from "lucide-react";
 
 const Index = () => {
   const [gameStarted, setGameStarted] = useState(false);
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to sign out. Please try again.",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate p-6">
       <div className="max-w-md mx-auto">
-        <GameLogo />
+        <div className="flex justify-between items-center">
+          <GameLogo />
+          <Button
+            variant="ghost"
+            className="text-gameGold hover:text-gameGold/80"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
+        </div>
         
         {!gameStarted ? (
           <div className="mt-8 animate-fade-in">
