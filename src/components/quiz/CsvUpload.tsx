@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Question } from "@/types/quiz";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CsvUploadProps {
   onQuestionsImported: (questions: Question[]) => void;
@@ -27,6 +28,22 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
       return;
     }
 
+    // Get the first quiz id (we'll use this as default for imported questions)
+    const { data: quizData } = await supabase
+      .from("quizzes")
+      .select("id")
+      .limit(1)
+      .single();
+
+    if (!quizData?.id) {
+      toast({
+        title: "Error",
+        description: "No quiz found to import questions into",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       try {
@@ -40,7 +57,8 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
             question,
             correct_answer: correctAnswer,
             options: [...options, correctAnswer].sort(() => Math.random() - 0.5),
-            level: 1 // Default level for imported questions
+            level: 1, // Default level for imported questions
+            quiz_id: quizData.id
           };
         });
 

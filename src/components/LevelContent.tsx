@@ -43,7 +43,7 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
       id: q.id,
       question: q.question,
       correct_answer: q.correct_answer,
-      options: Array.isArray(q.options) ? q.options : [],
+      options: Array.isArray(q.options) ? q.options.map(opt => String(opt)) : [],
       level: q.level,
       quiz_id: q.quiz_id
     }));

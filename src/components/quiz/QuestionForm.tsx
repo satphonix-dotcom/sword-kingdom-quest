@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Question } from "@/types/quiz";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuestionFormProps {
   onAddQuestion: (question: Question) => void;
@@ -16,11 +17,27 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
   const [level, setLevel] = useState<number>(1);
 
-  const handleAddQuestion = () => {
+  const handleAddQuestion = async () => {
     if (!currentQuestion.trim() || !correctAnswer.trim() || options.some(opt => !opt.trim())) {
       toast({
         title: "Error",
         description: "All fields are required",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Get the first quiz id (we'll use this as default for new questions)
+    const { data: quizData } = await supabase
+      .from("quizzes")
+      .select("id")
+      .limit(1)
+      .single();
+
+    if (!quizData?.id) {
+      toast({
+        title: "Error",
+        description: "No quiz found to add question to",
         variant: "destructive",
       });
       return;
@@ -33,7 +50,8 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
       question: currentQuestion,
       correct_answer: correctAnswer,
       options: allOptions,
-      level
+      level,
+      quiz_id: quizData.id
     });
 
     setCurrentQuestion("");
