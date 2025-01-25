@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
 import { QuizManager } from "@/components/QuizManager";
+import { LogOut } from "lucide-react";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -88,6 +89,19 @@ const Admin = () => {
     fetchProfiles();
   };
 
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
+      return;
+    }
+    navigate('/auth');
+  };
+
   if (!currentUserIsAdmin) {
     return null;
   }
@@ -96,18 +110,28 @@ const Admin = () => {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <div className="space-x-2">
-          <Button
-            variant={activeTab === 'users' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('users')}
+        <div className="flex items-center gap-4">
+          <div className="space-x-2">
+            <Button
+              variant={activeTab === 'users' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('users')}
+            >
+              User Management
+            </Button>
+            <Button
+              variant={activeTab === 'quizzes' ? 'default' : 'outline'}
+              onClick={() => setActiveTab('quizzes')}
+            >
+              Quiz Management
+            </Button>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="gap-2"
           >
-            User Management
-          </Button>
-          <Button
-            variant={activeTab === 'quizzes' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('quizzes')}
-          >
-            Quiz Management
+            <LogOut className="h-4 w-4" />
+            Logout
           </Button>
         </div>
       </div>
