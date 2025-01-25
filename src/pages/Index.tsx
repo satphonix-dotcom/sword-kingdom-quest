@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { GameLogo } from "@/components/GameLogo";
 import { LevelButton } from "@/components/LevelButton";
 import { Leaderboard } from "@/components/Leaderboard";
@@ -7,9 +7,20 @@ import { Story } from "@/components/Story";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useGame } from "@/hooks/use-game";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const { gameStarted, setGameStarted, userId, handleLogout } = useGame();
+  const { toast } = useToast();
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
+
+  const handleLevelSelect = (level: number) => {
+    setSelectedLevel(level);
+    toast({
+      title: `Level ${level} Selected`,
+      description: "This feature is coming soon! Stay tuned.",
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate p-4">
@@ -38,18 +49,23 @@ const Index = () => {
                 title="The Basics"
                 description="Master the fundamentals"
                 points={100}
+                onClick={() => handleLevelSelect(1)}
               />
               <LevelButton
                 level={2}
                 title="Advanced Concepts"
                 description="Dive deeper into complexity"
                 points={200}
+                onClick={() => handleLevelSelect(2)}
+                isLocked={true}
               />
               <LevelButton
                 level={3}
                 title="Expert Challenges"
                 description="Test your mastery"
                 points={300}
+                onClick={() => handleLevelSelect(3)}
+                isLocked={true}
               />
               <div className="md:col-span-2 lg:col-span-3">
                 <Leaderboard />
