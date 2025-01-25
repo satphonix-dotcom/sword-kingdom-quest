@@ -8,7 +8,7 @@ import { QuestionsList } from "./QuestionsList";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-interface Question {
+export interface Question {
   id: string;
   question: string;
   correct_answer: string;

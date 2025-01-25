@@ -1,13 +1,7 @@
-import { Upload } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-
-interface Question {
-  id: string;
-  question: string;
-  correct_answer: string;
-  options: string[];
-}
+import { Question } from "./QuizForm";
 
 interface CsvUploadProps {
   onQuestionsImported: (questions: Question[]) => void;
@@ -15,48 +9,46 @@ interface CsvUploadProps {
 
 export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
   const { toast } = useToast();
+  const [file, setFile] = useState<File | null>(null);
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      toast({
+        title: "Error",
+        description: "Please select a file first",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const reader = new FileReader();
-    reader.onload = async (e) => {
+    reader.onload = (e) => {
       try {
         const text = e.target?.result as string;
-        const rows = text.split('\n');
-        const newQuestions: Question[] = [];
+        const rows = text.split('\n').filter(row => row.trim());
+        
+        const questions: Question[] = rows.slice(1).map(row => {
+          const [question, correctAnswer, ...options] = row.split(',').map(cell => cell.trim());
+          return {
+            id: Math.random().toString(),
+            question,
+            correct_answer: correctAnswer,
+            options: [...options, correctAnswer].sort(() => Math.random() - 0.5),
+            level: 1 // Default level for imported questions
+          };
+        });
 
-        // Skip header row and process each line
-        for (let i = 1; i < rows.length; i++) {
-          const row = rows[i].trim();
-          if (!row) continue;
-
-          const [question, correctAnswer, ...options] = row.split(',').map(item => item.trim());
-          
-          if (question && correctAnswer && options.length >= 4) {
-            newQuestions.push({
-              id: Math.random().toString(),
-              question,
-              correct_answer: correctAnswer,
-              options: [...options.slice(0, 4), correctAnswer].sort(() => Math.random() - 0.5)
-            });
-          }
-        }
-
-        if (newQuestions.length > 0) {
-          onQuestionsImported(newQuestions);
-          toast({
-            title: "Success",
-            description: `${newQuestions.length} questions imported successfully`,
-          });
-        } else {
-          toast({
-            title: "Error",
-            description: "No valid questions found in the file",
-            variant: "destructive",
-          });
-        }
+        onQuestionsImported(questions);
+        toast({
+          title: "Success",
+          description: `Imported ${questions.length} questions`,
+        });
       } catch (error) {
         toast({
           title: "Error",
@@ -70,24 +62,20 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
   };
 
   return (
-    <div className="flex items-center gap-4">
-      <Input
-        type="file"
-        accept=".csv"
-        onChange={handleFileUpload}
-        className="hidden"
-        id="csv-upload"
-      />
-      <label
-        htmlFor="csv-upload"
-        className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md cursor-pointer"
-      >
-        <Upload className="h-4 w-4" />
-        Upload CSV
-      </label>
-      <span className="text-sm text-muted-foreground">
-        CSV Format: question, correct_answer, option1, option2, option3, option4
-      </span>
+    <div className="space-y-4">
+      <h3 className="font-semibold">Import Questions from CSV</h3>
+      <div className="flex gap-2">
+        <input
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="flex-1"
+        />
+        <Button onClick={handleUpload}>Upload</Button>
+      </div>
+      <p className="text-sm text-muted-foreground">
+        CSV format: question,correct_answer,option1,option2,option3
+      </p>
     </div>
   );
 };
