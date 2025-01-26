@@ -1,16 +1,10 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Question, QuizFormProps } from "@/types/quiz";
+import { Question, QuizFormProps, Quiz } from "@/types/quiz";
 import { QuizMetadata } from "./QuizMetadata";
 import { QuizQuestions } from "./QuizQuestions";
 import { QuizActions } from "./QuizActions";
-
-interface Quiz {
-  id?: string;
-  title: string;
-  description: string | null;
-}
 
 interface ExtendedQuizFormProps extends QuizFormProps {
   editQuiz?: Quiz;
@@ -48,7 +42,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
           id: q.id,
           question: q.question,
           correct_answer: q.correct_answer,
-          options: Array.isArray(q.options) ? q.options.map(opt => String(opt)) : [], // Convert each option to string
+          options: Array.isArray(q.options) ? q.options.map(opt => String(opt)) : [],
           level: q.level,
           quiz_id: q.quiz_id
         }));
