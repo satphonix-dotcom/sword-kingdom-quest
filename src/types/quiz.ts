@@ -11,6 +11,7 @@ export interface QuizFormProps {
   userId: string | null;
   onSuccess: () => void;
   onCancel: () => void;
+  editQuiz?: Quiz;
 }
 
 export interface Quiz {
@@ -18,4 +19,5 @@ export interface Quiz {
   title: string;
   description: string | null;
   created_at: string;
+  time_limit: number | null;
 }
