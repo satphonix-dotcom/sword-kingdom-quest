@@ -5,12 +5,13 @@ import { QuizForm } from "@/components/quiz/QuizForm";
 import { QuizList } from "@/components/quiz/QuizList";
 import { supabase } from "@/integrations/supabase/client";
 import { Quiz } from "@/types/quiz";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 export const QuizManager = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
 
-  const { data: quizzes, refetch } = useQuery({
+  const { data: quizzes, refetch, isLoading, error } = useQuery({
     queryKey: ["quizzes"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -18,7 +19,10 @@ export const QuizManager = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching quizzes:", error);
+        throw error;
+      }
       return data as Quiz[];
     },
   });
@@ -62,7 +66,21 @@ export const QuizManager = () => {
         <h2 className="text-2xl font-bold">Quizzes</h2>
         <Button onClick={() => setShowForm(true)}>Create Quiz</Button>
       </div>
-      {quizzes && (
+
+      {isLoading && (
+        <Alert>
+          <AlertDescription>Loading quizzes...</AlertDescription>
+        </Alert>
+      )}
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>Failed to fetch quizzes. Please try again.</AlertDescription>
+        </Alert>
+      )}
+
+      {quizzes && !isLoading && !error && (
         <QuizList
           quizzes={quizzes}
           onQuizzesChange={refetch}
