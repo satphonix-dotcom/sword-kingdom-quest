@@ -18,6 +18,9 @@ export default {
       },
     },
     extend: {
+      backgroundImage: {
+        'parchment': "url('/lovable-uploads/d5bebc87-2e8f-4edd-aa89-250af46c23a7.png')",
+      },
       colors: {
         gameGold: "#FFD700",
         gamePurple: "#4A154B",
