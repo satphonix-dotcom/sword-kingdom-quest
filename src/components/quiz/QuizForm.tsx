@@ -48,7 +48,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
           id: q.id,
           question: q.question,
           correct_answer: q.correct_answer,
-          options: Array.isArray(q.options) ? q.options : [],
+          options: Array.isArray(q.options) ? q.options.map(opt => String(opt)) : [], // Convert each option to string
           level: q.level,
           quiz_id: q.quiz_id
         }));
