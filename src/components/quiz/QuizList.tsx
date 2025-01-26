@@ -10,6 +10,7 @@ interface Quiz {
   title: string;
   description: string | null;
   created_at: string;
+  time_limit: number | null;
 }
 
 interface QuizListProps {
@@ -100,6 +101,7 @@ export const QuizList = ({ quizzes, onQuizzesChange, onEdit }: QuizListProps) =>
           <TableHead>Title</TableHead>
           <TableHead>Description</TableHead>
           <TableHead>Levels</TableHead>
+          <TableHead>Time Limit</TableHead>
           <TableHead>Created At</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
@@ -110,6 +112,7 @@ export const QuizList = ({ quizzes, onQuizzesChange, onEdit }: QuizListProps) =>
             <TableCell>{quiz.title}</TableCell>
             <TableCell>{quiz.description}</TableCell>
             <TableCell>{getLevelBadges(quiz.id)}</TableCell>
+            <TableCell>{quiz.time_limit ? `${quiz.time_limit} minutes` : 'No limit'}</TableCell>
             <TableCell>{new Date(quiz.created_at).toLocaleDateString()}</TableCell>
             <TableCell>
               <div className="flex gap-2">
