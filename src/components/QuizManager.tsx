@@ -1,75 +1,73 @@
-import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { QuizForm } from "@/components/quiz/QuizForm";
+import { QuizList } from "@/components/quiz/QuizList";
 import { supabase } from "@/integrations/supabase/client";
-import { QuizForm } from "./quiz/QuizForm";
-import { QuizList } from "./quiz/QuizList";
-
-interface Quiz {
-  id: string;
-  title: string;
-  description: string | null;
-  created_at: string;
-}
+import { Quiz } from "@/types/quiz";
 
 export const QuizManager = () => {
-  const { toast } = useToast();
-  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [showQuizForm, setShowQuizForm] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
 
-  useEffect(() => {
-    fetchCurrentUser();
-    fetchQuizzes();
-  }, []);
+  const { data: quizzes, refetch } = useQuery({
+    queryKey: ["quizzes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("quizzes")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  const fetchCurrentUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      setUserId(user.id);
-    }
+      if (error) throw error;
+      return data as Quiz[];
+    },
+  });
+
+  const { data: session } = useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session;
+    },
+  });
+
+  const handleQuizCreated = () => {
+    setShowForm(false);
+    setEditingQuiz(null);
+    refetch();
   };
 
-  const fetchQuizzes = async () => {
-    const { data, error } = await supabase
-      .from("quizzes")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch quizzes",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setQuizzes(data || []);
+  const handleEdit = (quiz: Quiz) => {
+    setEditingQuiz(quiz);
+    setShowForm(true);
   };
+
+  if (showForm) {
+    return (
+      <QuizForm
+        userId={session?.user?.id || null}
+        onSuccess={handleQuizCreated}
+        onCancel={() => {
+          setShowForm(false);
+          setEditingQuiz(null);
+        }}
+        editQuiz={editingQuiz || undefined}
+      />
+    );
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Quiz Management</h2>
-        <Button onClick={() => setShowQuizForm(!showQuizForm)}>
-          <Plus className="mr-2" />
-          Create Quiz
-        </Button>
+        <h2 className="text-2xl font-bold">Quizzes</h2>
+        <Button onClick={() => setShowForm(true)}>Create Quiz</Button>
       </div>
-
-      {showQuizForm ? (
-        <QuizForm
-          userId={userId}
-          onSuccess={() => {
-            setShowQuizForm(false);
-            fetchQuizzes();
-          }}
-          onCancel={() => setShowQuizForm(false)}
+      {quizzes && (
+        <QuizList
+          quizzes={quizzes}
+          onQuizzesChange={refetch}
+          onEdit={handleEdit}
         />
-      ) : (
-        <QuizList quizzes={quizzes} onQuizzesChange={fetchQuizzes} />
       )}
     </div>
   );

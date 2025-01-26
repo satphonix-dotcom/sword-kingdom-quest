@@ -14,9 +14,10 @@ interface Quiz {
 interface QuizListProps {
   quizzes: Quiz[];
   onQuizzesChange: () => void;
+  onEdit: (quiz: Quiz) => void;
 }
 
-export const QuizList = ({ quizzes, onQuizzesChange }: QuizListProps) => {
+export const QuizList = ({ quizzes, onQuizzesChange, onEdit }: QuizListProps) => {
   const { toast } = useToast();
 
   const handleDeleteQuiz = async (quizId: string) => {
@@ -60,7 +61,11 @@ export const QuizList = ({ quizzes, onQuizzesChange }: QuizListProps) => {
             <TableCell>{new Date(quiz.created_at).toLocaleDateString()}</TableCell>
             <TableCell>
               <div className="flex gap-2">
-                <Button variant="outline" size="icon">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={() => onEdit(quiz)}
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button

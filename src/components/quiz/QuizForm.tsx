@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Question, QuizFormProps } from "@/types/quiz";
@@ -6,13 +6,51 @@ import { QuizMetadata } from "./QuizMetadata";
 import { QuizQuestions } from "./QuizQuestions";
 import { QuizActions } from "./QuizActions";
 
-export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
+interface Quiz {
+  id?: string;
+  title: string;
+  description: string | null;
+}
+
+interface ExtendedQuizFormProps extends QuizFormProps {
+  editQuiz?: Quiz;
+}
+
+export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuizFormProps) => {
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
 
-  const handleCreateQuiz = async () => {
+  useEffect(() => {
+    const loadQuizData = async () => {
+      if (editQuiz) {
+        setTitle(editQuiz.title);
+        setDescription(editQuiz.description || "");
+
+        // Fetch questions for this quiz
+        const { data: quizQuestions, error } = await supabase
+          .from("questions")
+          .select("*")
+          .eq("quiz_id", editQuiz.id);
+
+        if (error) {
+          toast({
+            title: "Error",
+            description: "Failed to load quiz questions",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setQuestions(quizQuestions);
+      }
+    };
+
+    loadQuizData();
+  }, [editQuiz]);
+
+  const handleSubmit = async () => {
     if (!userId) {
       toast({
         title: "Error",
@@ -40,52 +78,86 @@ export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
       return;
     }
 
-    const { data: quizData, error: quizError } = await supabase
-      .from("quizzes")
-      .insert({
-        title,
-        description,
-        created_by: userId
-      })
-      .select()
-      .single();
+    try {
+      if (editQuiz) {
+        // Update existing quiz
+        const { error: quizError } = await supabase
+          .from("quizzes")
+          .update({
+            title,
+            description,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", editQuiz.id);
 
-    if (quizError) {
+        if (quizError) throw quizError;
+
+        // Delete existing questions
+        const { error: deleteError } = await supabase
+          .from("questions")
+          .delete()
+          .eq("quiz_id", editQuiz.id);
+
+        if (deleteError) throw deleteError;
+
+        // Insert new questions
+        const { error: questionsError } = await supabase
+          .from("questions")
+          .insert(
+            questions.map(q => ({
+              quiz_id: editQuiz.id,
+              question: q.question,
+              correct_answer: q.correct_answer,
+              options: q.options,
+              level: q.level
+            }))
+          );
+
+        if (questionsError) throw questionsError;
+
+      } else {
+        // Create new quiz
+        const { data: quizData, error: quizError } = await supabase
+          .from("quizzes")
+          .insert({
+            title,
+            description,
+            created_by: userId
+          })
+          .select()
+          .single();
+
+        if (quizError) throw quizError;
+
+        const { error: questionsError } = await supabase
+          .from("questions")
+          .insert(
+            questions.map(q => ({
+              quiz_id: quizData.id,
+              question: q.question,
+              correct_answer: q.correct_answer,
+              options: q.options,
+              level: q.level
+            }))
+          );
+
+        if (questionsError) throw questionsError;
+      }
+
+      toast({
+        title: "Success",
+        description: `Quiz ${editQuiz ? 'updated' : 'created'} successfully`,
+      });
+
+      onSuccess();
+    } catch (error) {
+      console.error("Error saving quiz:", error);
       toast({
         title: "Error",
-        description: "Failed to create quiz",
+        description: `Failed to ${editQuiz ? 'update' : 'create'} quiz`,
         variant: "destructive",
       });
-      return;
     }
-
-    const questionsWithQuizId = questions.map(q => ({
-      quiz_id: quizData.id,
-      question: q.question,
-      correct_answer: q.correct_answer,
-      options: q.options,
-      level: q.level
-    }));
-
-    const { error: questionsError } = await supabase
-      .from("questions")
-      .insert(questionsWithQuizId);
-
-    if (questionsError) {
-      toast({
-        title: "Error",
-        description: "Failed to add questions",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Quiz created successfully",
-    });
-
-    onSuccess();
   };
 
   return (
@@ -102,7 +174,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel }: QuizFormProps) => {
       />
       <QuizActions 
         onCancel={onCancel}
-        onSubmit={handleCreateQuiz}
+        onSubmit={handleSubmit}
       />
     </div>
   );

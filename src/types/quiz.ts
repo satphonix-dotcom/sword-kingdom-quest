@@ -12,3 +12,10 @@ export interface QuizFormProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
+
+export interface Quiz {
+  id: string;
+  title: string;
+  description: string | null;
+  created_at: string;
+}
