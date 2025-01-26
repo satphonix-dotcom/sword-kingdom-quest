@@ -19,7 +19,7 @@ export default {
     },
     extend: {
       backgroundImage: {
-        'parchment': "url('/lovable-uploads/d5bebc87-2e8f-4edd-aa89-250af46c23a7.png')",
+        'parchment': "url('/lovable-uploads/03e20b09-d12a-44af-bf9b-51ad6a0e50b2.png')",
       },
       colors: {
         gameGold: "#FFD700",
