@@ -14,6 +14,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [timeLimit, setTimeLimit] = useState<number | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
       if (editQuiz) {
         setTitle(editQuiz.title);
         setDescription(editQuiz.description || "");
+        setTimeLimit(editQuiz.time_limit);
 
         // Fetch questions for this quiz
         const { data: quizQuestions, error } = await supabase
@@ -90,6 +92,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
           .update({
             title,
             description,
+            time_limit: timeLimit,
             updated_at: new Date().toISOString(),
           })
           .eq("id", editQuiz.id);
@@ -126,6 +129,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
           .insert({
             title,
             description,
+            time_limit: timeLimit,
             created_by: userId
           })
           .select()
@@ -169,8 +173,10 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
       <QuizMetadata
         title={title}
         description={description}
+        timeLimit={timeLimit}
         onTitleChange={setTitle}
         onDescriptionChange={setDescription}
+        onTimeLimitChange={setTimeLimit}
       />
       <QuizQuestions 
         questions={questions}
