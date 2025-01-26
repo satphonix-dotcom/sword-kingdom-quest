@@ -43,7 +43,17 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
           return;
         }
 
-        setQuestions(quizQuestions);
+        // Transform the data to match the Question interface
+        const transformedQuestions: Question[] = quizQuestions.map(q => ({
+          id: q.id,
+          question: q.question,
+          correct_answer: q.correct_answer,
+          options: Array.isArray(q.options) ? q.options : [],
+          level: q.level,
+          quiz_id: q.quiz_id
+        }));
+
+        setQuestions(transformedQuestions);
       }
     };
 
