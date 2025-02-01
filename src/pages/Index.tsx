@@ -26,7 +26,7 @@ const Index = () => {
 
   if (!gameStarted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate">
         {/* Bible Verse Banner */}
         <div className="bg-gamePurple/50 py-2 text-center">
           <p className="text-gameGold text-sm">"...the sword of the Spirit, which is the word of God." Ephesians 6:17</p>
@@ -57,7 +57,7 @@ const Index = () => {
             </div>
             <Link 
               to="/auth" 
-              className="bg-yellow-400 text-gamePurple px-6 py-2 rounded-md font-semibold hover:bg-yellow-300 transition-colors"
+              className="bg-gameGold text-gamePurple px-6 py-2 rounded-md font-semibold hover:bg-gameGold/90 transition-colors"
             >
               Sign In
             </Link>
@@ -72,7 +72,7 @@ const Index = () => {
           </p>
           <Link 
             to="/auth" 
-            className="bg-yellow-400 text-gamePurple px-8 py-3 rounded-md font-semibold text-lg hover:bg-yellow-300 transition-colors inline-flex items-center gap-2"
+            className="bg-gameGold text-gamePurple px-8 py-3 rounded-md font-semibold text-lg hover:bg-gameGold/90 transition-colors inline-flex items-center gap-2"
           >
             Sign In to Begin
             <ArrowRight className="w-5 h-5" />
@@ -105,53 +105,38 @@ const Index = () => {
 
         {/* Main Content */}
         <div className="max-w-6xl mx-auto space-y-8">
-          {gameStarted ? (
-            selectedLevel ? (
-              <LevelContent 
-                level={selectedLevel} 
-                onBack={handleBackToLevels}
-              />
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <LevelButton
-                  level={1}
-                  title="The Basics"
-                  description="Master the fundamentals"
-                  points={100}
-                  onClick={() => handleLevelSelect(1)}
-                />
-                <LevelButton
-                  level={2}
-                  title="Advanced Concepts"
-                  description="Dive deeper into complexity"
-                  points={200}
-                  onClick={() => handleLevelSelect(2)}
-                  isLocked={true}
-                />
-                <LevelButton
-                  level={3}
-                  title="Expert Challenges"
-                  description="Test your mastery"
-                  points={300}
-                  onClick={() => handleLevelSelect(3)}
-                  isLocked={true}
-                />
-                <div className="md:col-span-2 lg:col-span-3">
-                  <Leaderboard />
-                </div>
-              </div>
-            )
+          {selectedLevel ? (
+            <LevelContent 
+              level={selectedLevel} 
+              onBack={handleBackToLevels}
+            />
           ) : (
-            <div className="space-y-8">
-              <Story />
-              {userId && <UserDashboard userId={userId} />}
-              <div className="flex flex-col items-center space-y-4 animate-fade-in">
-                <Button
-                  onClick={() => setGameStarted(true)}
-                  className="bg-gameGold text-gamePurple hover:bg-gameGold/90 text-lg px-8 py-4"
-                >
-                  Begin Your Quest
-                </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <LevelButton
+                level={1}
+                title="The Basics"
+                description="Master the fundamentals"
+                points={100}
+                onClick={() => handleLevelSelect(1)}
+              />
+              <LevelButton
+                level={2}
+                title="Advanced Concepts"
+                description="Dive deeper into complexity"
+                points={200}
+                onClick={() => handleLevelSelect(2)}
+                isLocked={true}
+              />
+              <LevelButton
+                level={3}
+                title="Expert Challenges"
+                description="Test your mastery"
+                points={300}
+                onClick={() => handleLevelSelect(3)}
+                isLocked={true}
+              />
+              <div className="md:col-span-2 lg:col-span-3">
+                <Leaderboard />
               </div>
             </div>
           )}
