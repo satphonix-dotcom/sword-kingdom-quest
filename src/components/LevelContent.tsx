@@ -173,6 +173,7 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
           <QuizComplete
             score={score}
             totalQuestions={questions.length}
+            level={level}
             onBack={onBack}
           />
         ) : (
