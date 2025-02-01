@@ -1,140 +1,44 @@
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Edit, Trash } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
-
-interface Quiz {
-  id: string;
-  title: string;
-  description: string | null;
-  created_at: string;
-  time_limit: number | null;
-}
+import { Quiz } from "@/types/quiz";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface QuizListProps {
-  quizzes: Quiz[];
-  onQuizzesChange: () => void;
-  onEdit: (quiz: Quiz) => void;
+  quizzes: Quiz[] | null;
+  isLoading: boolean;
+  onQuizClick: (quizId: string) => void;
 }
 
-export const QuizList = ({ quizzes, onQuizzesChange, onEdit }: QuizListProps) => {
-  const { toast } = useToast();
+export const QuizList = ({ quizzes, isLoading, onQuizClick }: QuizListProps) => {
+  if (isLoading) {
+    return <div className="text-center py-4">Loading quizzes...</div>;
+  }
 
-  // Fetch questions for each quiz to get their levels
-  const { data: quizLevels } = useQuery({
-    queryKey: ["quizLevels"],
-    queryFn: async () => {
-      const { data: questions, error } = await supabase
-        .from("questions")
-        .select("quiz_id, level");
-
-      if (error) {
-        console.error("Error fetching quiz levels:", error);
-        return {};
-      }
-
-      // Group questions by quiz_id and get unique levels
-      const levelsByQuiz = questions.reduce((acc: Record<string, Set<number>>, q) => {
-        if (!acc[q.quiz_id]) {
-          acc[q.quiz_id] = new Set();
-        }
-        acc[q.quiz_id].add(q.level);
-        return acc;
-      }, {});
-
-      // Convert Sets to sorted arrays
-      return Object.fromEntries(
-        Object.entries(levelsByQuiz).map(([quizId, levels]) => [
-          quizId,
-          Array.from(levels).sort((a, b) => a - b)
-        ])
-      );
-    },
-  });
-
-  const handleDeleteQuiz = async (quizId: string) => {
-    const { error } = await supabase
-      .from("quizzes")
-      .delete()
-      .eq("id", quizId);
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete quiz",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toast({
-      title: "Success",
-      description: "Quiz deleted successfully",
-    });
-
-    onQuizzesChange();
-  };
-
-  const getLevelBadges = (quizId: string) => {
-    if (!quizLevels || !quizLevels[quizId]) return null;
-    
+  if (!quizzes || quizzes.length === 0) {
     return (
-      <div className="flex gap-1">
-        {quizLevels[quizId].map((level) => (
-          <span
-            key={level}
-            className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-slate-200"
-          >
-            Level {level}
-          </span>
-        ))}
+      <div className="text-center py-4">
+        No quizzes available for this level yet.
       </div>
     );
-  };
+  }
 
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Title</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead>Levels</TableHead>
-          <TableHead>Time Limit</TableHead>
-          <TableHead>Created At</TableHead>
-          <TableHead>Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {quizzes.map((quiz) => (
-          <TableRow key={quiz.id}>
-            <TableCell>{quiz.title}</TableCell>
-            <TableCell>{quiz.description}</TableCell>
-            <TableCell>{getLevelBadges(quiz.id)}</TableCell>
-            <TableCell>{quiz.time_limit ? `${quiz.time_limit} minutes` : 'No limit'}</TableCell>
-            <TableCell>{new Date(quiz.created_at).toLocaleDateString()}</TableCell>
-            <TableCell>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="icon"
-                  onClick={() => onEdit(quiz)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleDeleteQuiz(quiz.id)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <div className="space-y-4">
+      {quizzes.map((quiz) => (
+        <Card 
+          key={quiz.id} 
+          className="hover:bg-slate-100/90 hover:shadow-md transition-all cursor-pointer border border-slate-200"
+          onClick={() => onQuizClick(quiz.id)}
+        >
+          <CardContent className="p-4">
+            <h3 className="text-xl font-semibold text-white">{quiz.title}</h3>
+            {quiz.description && (
+              <p className="text-slate-300 mt-1">{quiz.description}</p>
+            )}
+            <p className="text-sm text-slate-400 mt-2">
+              Time limit: {quiz.time_limit || 'No'} minutes
+            </p>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 };
