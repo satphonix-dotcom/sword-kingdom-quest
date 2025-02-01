@@ -24,6 +24,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   const [timeLimit, setTimeLimit] = useState(editQuiz?.time_limit?.toString() || "30");
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: levels } = useQuery({
     queryKey: ["levels"],
@@ -78,6 +79,17 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
       });
       return;
     }
+
+    if (questions.length === 0) {
+      toast({
+        title: "Error",
+        description: "Please add at least one question to the quiz",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       let quizId = editQuiz?.id;
@@ -138,11 +150,13 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleQuestionsImported = (importedQuestions: Question[]) => {
-    setQuestions([...questions, ...importedQuestions]);
+    setQuestions(prevQuestions => [...prevQuestions, ...importedQuestions]);
   };
 
   return (
@@ -208,15 +222,17 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
           type="button"
           variant="outline"
           onClick={onCancel}
+          disabled={isSubmitting}
           className="bg-transparent text-white border-gray-700 hover:bg-gray-800"
         >
           Cancel
         </Button>
         <Button
           type="submit"
+          disabled={isSubmitting}
           className="bg-blue-600 text-white hover:bg-blue-700"
         >
-          {editQuiz ? "Update Quiz" : "Create Quiz"}
+          {isSubmitting ? 'Saving...' : (editQuiz ? "Update Quiz" : "Create Quiz")}
         </Button>
       </div>
     </form>

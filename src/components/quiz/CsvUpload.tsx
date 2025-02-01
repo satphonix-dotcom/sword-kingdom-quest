@@ -69,7 +69,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
         onQuestionsImported(questions);
         toast({
           title: "Success",
-          description: `Imported ${questions.length} questions`,
+          description: `${questions.length} questions parsed successfully. Click "Create Quiz" to save them.`,
         });
 
         // Clear the file input
@@ -104,7 +104,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
           disabled={!file}
           className="bg-blue-600 text-white hover:bg-blue-700"
         >
-          Upload
+          Parse CSV
         </Button>
       </div>
       <p className="text-sm text-gray-400">
