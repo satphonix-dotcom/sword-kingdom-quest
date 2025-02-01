@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@2.0.0";
-
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -15,6 +13,8 @@ interface ContactEmailRequest {
   message: string;
 }
 
+const client = new SmtpClient();
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -24,38 +24,52 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message }: ContactEmailRequest = await req.json();
 
-    const emailResponse = await resend.emails.send({
-      from: "Sword Kings <onboarding@resend.dev>",
-      to: ["support@swordkings.com"], // Replace with your actual support email
-      reply_to: email,
+    await client.connectTLS({
+      hostname: "smtp.gmail.com",
+      port: 465,
+      username: Deno.env.get("GMAIL_USER"),
+      password: Deno.env.get("GMAIL_APP_PASSWORD"),
+    });
+
+    // Send to support
+    await client.send({
+      from: Deno.env.get("GMAIL_USER") || "",
+      to: "support@swordkings.com",
       subject: `New Contact Form Submission from ${name}`,
-      html: `
-        <h1>New Contact Form Submission</h1>
-        <p><strong>From:</strong> ${name} (${email})</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
+      content: `
+        New Contact Form Submission
+        From: ${name} (${email})
+        Message:
+        ${message}
       `,
     });
 
-    // Send confirmation email to the user
-    await resend.emails.send({
-      from: "Sword Kings <onboarding@resend.dev>",
-      to: [email],
+    // Send confirmation to user
+    await client.send({
+      from: Deno.env.get("GMAIL_USER") || "",
+      to: email,
       subject: "We received your message!",
-      html: `
-        <h1>Thank you for contacting us, ${name}!</h1>
-        <p>We have received your message and will get back to you as soon as possible.</p>
-        <p>Best regards,<br>The Sword Kings Team</p>
+      content: `
+        Thank you for contacting us, ${name}!
+        We have received your message and will get back to you as soon as possible.
+        
+        Best regards,
+        The Sword Kings Team
       `,
     });
 
-    return new Response(JSON.stringify(emailResponse), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    });
+    await client.close();
+
+    return new Response(
+      JSON.stringify({ message: "Emails sent successfully" }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      }
+    );
   } catch (error: any) {
     console.error("Error in send-contact-email function:", error);
     return new Response(
