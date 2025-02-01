@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionsList } from "./QuestionsList";
 import { CsvUpload } from "./CsvUpload";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +22,22 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   const [title, setTitle] = useState(editQuiz?.title || "");
   const [description, setDescription] = useState(editQuiz?.description || "");
   const [timeLimit, setTimeLimit] = useState(editQuiz?.time_limit?.toString() || "30");
+  const [selectedLevel, setSelectedLevel] = useState<number>(1);
   const [questions, setQuestions] = useState<Question[]>([]);
+
+  // Fetch levels for the dropdown
+  const { data: levels } = useQuery({
+    queryKey: ["levels"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("levels")
+        .select("*")
+        .order("order_number");
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   // Fetch questions when editing a quiz
   const { data: quizQuestions } = useQuery({
@@ -124,21 +140,43 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
         className="min-h-[100px] bg-transparent border-gray-700 text-white"
       />
 
-      <Input
-        type="number"
-        placeholder="Time Limit (minutes)"
-        value={timeLimit}
-        onChange={(e) => setTimeLimit(e.target.value)}
-        required
-        min="1"
-        className="w-full bg-transparent border-gray-700 text-white"
-      />
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <Input
+            type="number"
+            placeholder="Time Limit (minutes)"
+            value={timeLimit}
+            onChange={(e) => setTimeLimit(e.target.value)}
+            required
+            min="1"
+            className="w-full bg-transparent border-gray-700 text-white"
+          />
+        </div>
+        <div className="flex-1">
+          <Select
+            value={selectedLevel.toString()}
+            onValueChange={(value) => setSelectedLevel(parseInt(value))}
+          >
+            <SelectTrigger className="w-full bg-transparent border-gray-700 text-white">
+              <SelectValue placeholder="Select Level" />
+            </SelectTrigger>
+            <SelectContent>
+              {levels?.map((level) => (
+                <SelectItem key={level.id} value={level.order_number.toString()}>
+                  Level {level.order_number} ({level.title})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
       <div className="space-y-4">
         <h3 className="text-white font-semibold">Import Questions from CSV</h3>
         <CsvUpload 
           onQuestionsImported={handleQuestionsImported}
           quizId={editQuiz?.id}
+          level={selectedLevel}
         />
       </div>
 
