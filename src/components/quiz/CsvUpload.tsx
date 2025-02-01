@@ -28,7 +28,6 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
       return;
     }
 
-    // Get the first quiz id (we'll use this as default for imported questions)
     const { data: quizData } = await supabase
       .from("quizzes")
       .select("id")
@@ -57,7 +56,7 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
             question,
             correct_answer: correctAnswer,
             options: [...options, correctAnswer].sort(() => Math.random() - 0.5),
-            level: 1, // Default level for imported questions
+            level: 1,
             quiz_id: quizData.id
           };
         });
@@ -80,18 +79,22 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-semibold">Import Questions from CSV</h3>
+    <div className="space-y-2">
       <div className="flex gap-2">
         <input
           type="file"
           accept=".csv"
           onChange={handleFileChange}
-          className="flex-1"
+          className="flex-1 text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-800 file:text-white hover:file:bg-gray-700 cursor-pointer"
         />
-        <Button onClick={handleUpload}>Upload</Button>
+        <Button 
+          onClick={handleUpload}
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
+          Upload
+        </Button>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-gray-400">
         CSV format: question,correct_answer,option1,option2,option3
       </p>
     </div>

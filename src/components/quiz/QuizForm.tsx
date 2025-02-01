@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionForm } from "./QuestionForm";
@@ -109,84 +108,62 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
-      <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          className="w-full"
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto bg-[#020817] p-8 rounded-lg">
+      <Input
+        placeholder="Quiz Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+        className="w-full bg-transparent border-gray-700 text-white"
+      />
+
+      <Textarea
+        placeholder="Quiz Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        className="min-h-[100px] bg-transparent border-gray-700 text-white"
+      />
+
+      <Input
+        type="number"
+        placeholder="Time Limit (minutes)"
+        value={timeLimit}
+        onChange={(e) => setTimeLimit(e.target.value)}
+        required
+        min="1"
+        className="w-full bg-transparent border-gray-700 text-white"
+      />
+
+      <div className="space-y-4">
+        <h3 className="text-white font-semibold">Import Questions from CSV</h3>
+        <CsvUpload onQuestionsImported={handleQuestionsImported} />
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="text-white font-semibold">Add Questions</h3>
+        <QuestionForm 
+          onAddQuestion={(question) => setQuestions([...questions, question])}
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className="min-h-[100px]"
-        />
+      <QuestionsList questions={questions} />
+
+      <div className="flex justify-end gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          className="bg-transparent text-white border-gray-700 hover:bg-gray-800"
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
+          {editQuiz ? "Update Quiz" : "Create Quiz"}
+        </Button>
       </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="timeLimit">Time Limit (minutes)</Label>
-        <Input
-          id="timeLimit"
-          type="number"
-          value={timeLimit}
-          onChange={(e) => setTimeLimit(e.target.value)}
-          required
-          min="1"
-          className="w-full"
-        />
-      </div>
-
-      {editQuiz && (
-        <div className="space-y-2">
-          <Label htmlFor="level">Level</Label>
-          <Select
-            value={selectedLevel}
-            onValueChange={setSelectedLevel}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select a level" />
-            </SelectTrigger>
-            <SelectContent>
-              {levels?.map((level) => (
-                <SelectItem key={level.order_number} value={level.order_number.toString()}>
-                  Level {level.order_number}: {level.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      <CsvUpload onQuestionsImported={handleQuestionsImported} />
-
-      <div className="flex justify-between">
-        <div className="space-x-2">
-          <Button type="submit">
-            {editQuiz ? "Update Quiz" : "Create Quiz"}
-          </Button>
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        </div>
-        {editQuiz && (
-          <Button
-            type="button"
-            onClick={() => setShowQuestionForm(true)}
-          >
-            Add Questions
-          </Button>
-        )}
-      </div>
-
-      {editQuiz && <QuestionsList quizId={editQuiz.id} questions={questions} />}
     </form>
   );
 };

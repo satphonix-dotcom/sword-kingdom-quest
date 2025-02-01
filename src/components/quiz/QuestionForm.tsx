@@ -30,7 +30,6 @@ export const QuestionForm = ({ onAddQuestion, quizId, onBack, level = 1 }: Quest
       return;
     }
 
-    // Use provided quizId or get the first quiz id
     let targetQuizId = quizId;
     if (!targetQuizId) {
       const { data: quizData } = await supabase
@@ -73,27 +72,18 @@ export const QuestionForm = ({ onAddQuestion, quizId, onBack, level = 1 }: Quest
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Add Questions</h3>
-        {onBack && (
-          <Button variant="outline" onClick={onBack}>
-            Back to Quiz
-          </Button>
-        )}
-      </div>
       <div className="flex gap-4">
-        <div className="flex-1">
-          <Input
-            placeholder="Question"
-            value={currentQuestion}
-            onChange={(e) => setCurrentQuestion(e.target.value)}
-          />
-        </div>
+        <Input
+          placeholder="Question"
+          value={currentQuestion}
+          onChange={(e) => setCurrentQuestion(e.target.value)}
+          className="flex-1 bg-transparent border-gray-700 text-white"
+        />
         <Select
           value={selectedLevel.toString()}
           onValueChange={(value) => setSelectedLevel(parseInt(value))}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[180px] bg-transparent border-gray-700 text-white">
             <SelectValue placeholder="Select Level" />
           </SelectTrigger>
           <SelectContent>
@@ -103,15 +93,17 @@ export const QuestionForm = ({ onAddQuestion, quizId, onBack, level = 1 }: Quest
           </SelectContent>
         </Select>
       </div>
+
       <div className="space-y-2">
         <Input
           placeholder="Correct Answer"
           value={correctAnswer}
           onChange={(e) => setCorrectAnswer(e.target.value)}
-          className="border-green-500"
+          className="border-green-600 bg-transparent text-white"
         />
-        <p className="text-sm text-muted-foreground">This will be shuffled with other options</p>
+        <p className="text-sm text-gray-400">This will be shuffled with other options</p>
       </div>
+
       {options.map((option, index) => (
         <Input
           key={index}
@@ -122,9 +114,27 @@ export const QuestionForm = ({ onAddQuestion, quizId, onBack, level = 1 }: Quest
             newOptions[index] = e.target.value;
             setOptions(newOptions);
           }}
+          className="bg-transparent border-gray-700 text-white"
         />
       ))}
-      <Button onClick={handleAddQuestion}>Add Question</Button>
+
+      <div className="flex justify-between">
+        {onBack && (
+          <Button 
+            variant="outline" 
+            onClick={onBack}
+            className="bg-transparent text-white border-gray-700 hover:bg-gray-800"
+          >
+            Back to Quiz
+          </Button>
+        )}
+        <Button 
+          onClick={handleAddQuestion}
+          className="bg-blue-600 text-white hover:bg-blue-700"
+        >
+          Add Question
+        </Button>
+      </div>
     </div>
   );
 };

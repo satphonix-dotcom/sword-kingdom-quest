@@ -27,16 +27,14 @@ export const QuestionsList = ({ questions, quizId }: QuestionsListProps) => {
 
   return (
     <div className="mt-4">
-      <h4 className="font-semibold">Added Questions:</h4>
-      <ul className="list-disc pl-5">
+      <h4 className="font-semibold text-white mb-2">Added Questions:</h4>
+      <ul className="space-y-2">
         {displayQuestions.map((q) => (
-          <li key={q.id} className="mb-2">
-            <span className="inline-flex items-center gap-2">
-              <span className="text-sm font-medium px-2 py-1 bg-slate-200 rounded-full">
-                Level {q.level}
-              </span>
-              {q.question}
+          <li key={q.id} className="flex items-center gap-2">
+            <span className="text-sm px-2 py-1 bg-gray-800 text-white rounded-full">
+              Level {q.level}
             </span>
+            <span className="text-gray-300">{q.question}</span>
           </li>
         ))}
       </ul>
