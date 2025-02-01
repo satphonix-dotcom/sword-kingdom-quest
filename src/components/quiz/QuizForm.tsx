@@ -58,14 +58,16 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   // Update questions state when quiz questions are fetched
   useEffect(() => {
     if (quizQuestions) {
-      // Convert the Supabase data to Question type, ensuring options is string[]
       const convertedQuestions: Question[] = quizQuestions.map(q => ({
         ...q,
         options: Array.isArray(q.options) 
-          ? q.options.map(opt => String(opt)) // Convert each option to string
+          ? q.options.map(opt => String(opt))
           : []
       }));
       setQuestions(convertedQuestions);
+      if (convertedQuestions.length > 0) {
+        setSelectedLevel(convertedQuestions[0].level);
+      }
     }
   }, [quizQuestions]);
 
