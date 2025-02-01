@@ -21,8 +21,8 @@ export const CsvUpload = ({ onQuestionsImported, quizId, level = 1 }: CsvUploadP
   };
 
   const validateCsvRow = (row: string[]): boolean => {
-    // Check if we have at least question, correct answer, and one option
-    if (row.length < 3) return false;
+    // Check if we have question, correct answer, and exactly 4 options
+    if (row.length !== 6) return false; // question + correct_answer + 4 options = 6 columns
     // Check if all fields are non-empty
     return row.every(field => field.trim().length > 0);
   };
@@ -62,7 +62,7 @@ export const CsvUpload = ({ onQuestionsImported, quizId, level = 1 }: CsvUploadP
         if (validRows.length === 0) {
           toast({
             title: "Error",
-            description: "No valid questions found in CSV file",
+            description: "No valid questions found in CSV file. Each row must contain: question, correct answer, and exactly 4 options",
             variant: "destructive",
           });
           return;
@@ -138,7 +138,7 @@ export const CsvUpload = ({ onQuestionsImported, quizId, level = 1 }: CsvUploadP
         </Button>
       </div>
       <p className="text-sm text-gray-400">
-        CSV format: question,correct_answer,option1,option2,option3
+        CSV format: question,correct_answer,option1,option2,option3,option4
       </p>
     </div>
   );
