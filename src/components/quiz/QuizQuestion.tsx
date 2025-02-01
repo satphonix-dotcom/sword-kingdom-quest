@@ -30,7 +30,11 @@ export const QuizQuestion = ({
             <Button
               key={index}
               variant={selectedAnswer === option ? "default" : "outline"}
-              className="w-full justify-start text-left hover:bg-gray-100 transition-colors"
+              className={`w-full justify-start text-left ${
+                selectedAnswer === option 
+                  ? 'bg-primary hover:bg-primary/90 text-primary-foreground' 
+                  : 'bg-background hover:bg-accent/10 text-foreground'
+              }`}
               onClick={() => onAnswerSelect(option)}
             >
               {option}
