@@ -5,7 +5,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { UserDashboard } from "@/components/UserDashboard";
 import { Story } from "@/components/Story";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Volume2, LogOut } from "lucide-react";
+import { ArrowRight, Volume2, LogOut, Book, Trophy, Users, Facebook, Twitter, Instagram, Mail } from "lucide-react";
 import { useGame } from "@/hooks/use-game";
 import { useToast } from "@/hooks/use-toast";
 import { LevelContent } from "@/components/LevelContent";
@@ -70,16 +70,92 @@ const Index = () => {
           <p className="text-gray-300 text-xl max-w-3xl mb-8">
             Test your combat skills, compete with others, and master the art of warfare through our engaging quest system.
           </p>
-          <Link 
-            to="/auth" 
-            className="bg-gameGold text-gamePurple px-8 py-3 rounded-md font-semibold text-lg hover:bg-gameGold/90 transition-colors inline-flex items-center gap-2"
-          >
-            Sign In to Begin
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-          <p className="text-gray-400 mt-4">
-            You must be signed in to start your warrior journey
-          </p>
+          
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
+            <div className="bg-gamePurple/40 p-8 rounded-lg text-center">
+              <Book className="w-12 h-12 text-gameGold mx-auto mb-4" />
+              <h3 className="text-gameGold text-xl font-semibold mb-3">Biblical Knowledge</h3>
+              <p className="text-gray-300">
+                Explore scripture through carefully crafted questions spanning both Old and New Testaments.
+              </p>
+            </div>
+            <div className="bg-gamePurple/40 p-8 rounded-lg text-center">
+              <Trophy className="w-12 h-12 text-gameGold mx-auto mb-4" />
+              <h3 className="text-gameGold text-xl font-semibold mb-3">Earn Rewards</h3>
+              <p className="text-gray-300">
+                Gain points and achievements as you progress through different difficulty levels.
+              </p>
+            </div>
+            <div className="bg-gamePurple/40 p-8 rounded-lg text-center">
+              <Users className="w-12 h-12 text-gameGold mx-auto mb-4" />
+              <h3 className="text-gameGold text-xl font-semibold mb-3">Community</h3>
+              <p className="text-gray-300">
+                Compete with other believers worldwide and see where you rank on our global leaderboard.
+              </p>
+            </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="text-center mb-16">
+            <h2 className="text-gameGold text-4xl font-bold mb-4">Ready to Begin Your Biblical Journey?</h2>
+            <p className="text-gray-300 mb-8">Create an account to track your progress and compete with others.</p>
+            <div className="flex gap-4 justify-center">
+              <Link 
+                to="/auth" 
+                className="bg-gameGold text-gamePurple px-8 py-3 rounded-md font-semibold text-lg hover:bg-gameGold/90 transition-colors"
+              >
+                Sign Up Now
+              </Link>
+              <Button variant="outline" className="text-gameGold border-gameGold hover:bg-gameGold/10">
+                Learn More
+              </Button>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <footer className="w-full bg-gamePurple/30 mt-auto">
+            <div className="container mx-auto px-4 py-12">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                  <h3 className="text-gameGold font-semibold mb-4">Game of Sword Kings</h3>
+                  <p className="text-gray-300">
+                    Embark on an epic journey, test your skills, and become a legendary warrior.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-gameGold font-semibold mb-4">Quick Links</h3>
+                  <ul className="space-y-2">
+                    <li><Link to="/" className="text-gray-300 hover:text-gameGold">Home</Link></li>
+                    <li><Link to="/" className="text-gray-300 hover:text-gameGold">Leaderboard</Link></li>
+                    <li><Link to="/" className="text-gray-300 hover:text-gameGold">About</Link></li>
+                    <li><Link to="/" className="text-gray-300 hover:text-gameGold">Contact</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-gameGold font-semibold mb-4">Resources</h3>
+                  <ul className="space-y-2">
+                    <li><Link to="/" className="text-gray-300 hover:text-gameGold">Study Guide</Link></li>
+                    <li><Link to="/" className="text-gray-300 hover:text-gameGold">FAQ</Link></li>
+                    <li><Link to="/" className="text-gray-300 hover:text-gameGold">Support</Link></li>
+                    <li><Link to="/" className="text-gray-300 hover:text-gameGold">Privacy Policy</Link></li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="text-gameGold font-semibold mb-4">Connect With Us</h3>
+                  <div className="flex gap-4">
+                    <a href="#" className="text-gray-300 hover:text-gameGold"><Facebook className="w-6 h-6" /></a>
+                    <a href="#" className="text-gray-300 hover:text-gameGold"><Twitter className="w-6 h-6" /></a>
+                    <a href="#" className="text-gray-300 hover:text-gameGold"><Instagram className="w-6 h-6" /></a>
+                    <a href="#" className="text-gray-300 hover:text-gameGold"><Mail className="w-6 h-6" /></a>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center pt-8 border-t border-gray-700">
+                <p className="text-gray-400">© 2025 Game of Sword Kings. All rights reserved.</p>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
     );
