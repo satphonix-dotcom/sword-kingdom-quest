@@ -44,11 +44,22 @@ export const AuthForm = () => {
         navigate("/");
       }
     } catch (error: any) {
+      let errorMessage = "An error occurred. Please try again.";
+      
+      if (error.message.includes("invalid_credentials")) {
+        errorMessage = "Invalid email or password. Please try again.";
+      } else if (error.message.includes("Email not confirmed")) {
+        errorMessage = "Please verify your email before signing in.";
+      } else if (error.message.includes("User already registered")) {
+        errorMessage = "This email is already registered. Please sign in instead.";
+      }
+
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message,
+        description: errorMessage,
       });
+      console.error("Auth error:", error);
     } finally {
       setIsLoading(false);
     }
