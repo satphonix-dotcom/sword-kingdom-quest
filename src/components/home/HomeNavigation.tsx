@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Volume2 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 export const HomeNavigation = () => {
   const [user, setUser] = React.useState<any>(null);
+  const [isAdmin, setIsAdmin] = React.useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -13,6 +13,9 @@ export const HomeNavigation = () => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        checkAdminStatus(session.user.id);
+      }
     });
 
     // Listen for auth changes
@@ -20,10 +23,25 @@ export const HomeNavigation = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        checkAdminStatus(session.user.id);
+      } else {
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const checkAdminStatus = async (userId: string) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', userId)
+      .single();
+    
+    setIsAdmin(profile?.is_admin || false);
+  };
 
   const handleSignOut = async () => {
     try {
@@ -58,12 +76,14 @@ export const HomeNavigation = () => {
           <Link to="/" className="text-gameGold hover:text-gameGold/80">Home</Link>
           <Link to="/leaderboard" className="text-gameGold hover:text-gameGold/80">Leaderboard</Link>
           <Link to="/about" className="text-gameGold hover:text-gameGold/80">About</Link>
-        </div>
-        <div className="flex items-center gap-4">
-          <Volume2 className="text-gameGold w-6 h-6" />
-          <div className="w-24 h-1 bg-gameGold/30 rounded-full">
-            <div className="w-1/2 h-full bg-gameGold rounded-full"></div>
-          </div>
+          {isAdmin && (
+            <Link 
+              to="/admin" 
+              className="text-gameGold hover:text-gameGold/80"
+            >
+              Admin Panel
+            </Link>
+          )}
         </div>
         {user ? (
           <button 
