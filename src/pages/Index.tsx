@@ -5,7 +5,7 @@ import { Leaderboard } from "@/components/Leaderboard";
 import { UserDashboard } from "@/components/UserDashboard";
 import { Story } from "@/components/Story";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Volume2 } from "lucide-react";
+import { ArrowRight, Volume2, LogOut } from "lucide-react";
 import { useGame } from "@/hooks/use-game";
 import { useToast } from "@/hooks/use-toast";
 import { LevelContent } from "@/components/LevelContent";
