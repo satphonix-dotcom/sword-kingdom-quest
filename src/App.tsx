@@ -8,6 +8,7 @@ import StudyGuide from "./pages/StudyGuide";
 import FAQ from "./pages/FAQ";
 import Support from "./pages/Support";
 import Privacy from "./pages/Privacy";
+import LearnMore from "./pages/LearnMore";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/faq" element={<FAQ />} />
         <Route path="/support" element={<Support />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/learn-more" element={<LearnMore />} />
       </Routes>
     </Router>
   );
