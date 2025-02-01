@@ -6,8 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Levels = () => {
+  const navigate = useNavigate();
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
 
   const { data: levels, isLoading: isLoadingLevels } = useQuery({
@@ -50,6 +52,10 @@ const Levels = () => {
     setSelectedLevel(null);
   };
 
+  const handleQuizClick = (quizId: string) => {
+    navigate(`/quiz/${quizId}`);
+  };
+
   if (isLoadingLevels) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate">
@@ -87,7 +93,11 @@ const Levels = () => {
                 ) : quizzes && quizzes.length > 0 ? (
                   <div className="space-y-4">
                     {quizzes.map((quiz) => (
-                      <Card key={quiz.id} className="hover:bg-slate-50 transition-colors">
+                      <Card 
+                        key={quiz.id} 
+                        className="hover:bg-slate-50 transition-colors cursor-pointer"
+                        onClick={() => handleQuizClick(quiz.id)}
+                      >
                         <CardContent className="p-4">
                           <h3 className="text-xl font-semibold">{quiz.title}</h3>
                           {quiz.description && (
