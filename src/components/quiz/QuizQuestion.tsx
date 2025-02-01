@@ -18,12 +18,15 @@ export const QuizQuestion = ({
   onBack,
   isLastQuestion,
 }: QuizQuestionProps) => {
+  // Filter out empty options and remove duplicates
+  const validOptions = Array.from(new Set(question.options.filter(option => option && option.trim() !== '')));
+
   return (
     <div className="space-y-4">
       <div className="p-6 rounded-lg shadow-lg bg-white">
         <p className="text-lg font-medium mb-4 text-gameSlate">{question.question}</p>
         <div className="space-y-2">
-          {question.options.map((option, index) => (
+          {validOptions.map((option, index) => (
             <Button
               key={index}
               variant={selectedAnswer === option ? "default" : "outline"}
