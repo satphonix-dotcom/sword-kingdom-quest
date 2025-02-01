@@ -20,14 +20,14 @@ export const QuizQuestion = ({
 }: QuizQuestionProps) => {
   return (
     <div className="space-y-4">
-      <div className="bg-parchment bg-cover bg-center p-6 rounded-lg shadow-lg">
+      <div className="p-6 rounded-lg shadow-lg bg-white">
         <p className="text-lg font-medium mb-4 text-gameSlate">{question.question}</p>
         <div className="space-y-2">
           {question.options.map((option, index) => (
             <Button
               key={index}
               variant={selectedAnswer === option ? "default" : "outline"}
-              className="w-full justify-start text-left bg-white/80 hover:bg-white/90 transition-colors"
+              className="w-full justify-start text-left hover:bg-gray-100 transition-colors"
               onClick={() => onAnswerSelect(option)}
             >
               {option}
