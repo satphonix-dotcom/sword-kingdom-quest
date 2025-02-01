@@ -7,15 +7,18 @@ import { Question } from "@/types/quiz";
 import { supabase } from "@/integrations/supabase/client";
 
 interface QuestionFormProps {
-  onAddQuestion: (question: Question) => void;
+  onAddQuestion?: (question: Question) => void;
+  quizId?: string;
+  onBack?: () => void;
+  level?: number;
 }
 
-export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
+export const QuestionForm = ({ onAddQuestion, quizId, onBack, level = 1 }: QuestionFormProps) => {
   const { toast } = useToast();
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
-  const [level, setLevel] = useState<number>(1);
+  const [selectedLevel, setSelectedLevel] = useState<number>(level);
 
   const handleAddQuestion = async () => {
     if (!currentQuestion.trim() || !correctAnswer.trim() || options.some(opt => !opt.trim())) {
@@ -27,42 +30,57 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
       return;
     }
 
-    // Get the first quiz id (we'll use this as default for new questions)
-    const { data: quizData } = await supabase
-      .from("quizzes")
-      .select("id")
-      .limit(1)
-      .single();
+    // Use provided quizId or get the first quiz id
+    let targetQuizId = quizId;
+    if (!targetQuizId) {
+      const { data: quizData } = await supabase
+        .from("quizzes")
+        .select("id")
+        .limit(1)
+        .single();
 
-    if (!quizData?.id) {
-      toast({
-        title: "Error",
-        description: "No quiz found to add question to",
-        variant: "destructive",
-      });
-      return;
+      if (!quizData?.id) {
+        toast({
+          title: "Error",
+          description: "No quiz found to add question to",
+          variant: "destructive",
+        });
+        return;
+      }
+      targetQuizId = quizData.id;
     }
 
     const allOptions = [...options, correctAnswer].sort(() => Math.random() - 0.5);
 
-    onAddQuestion({
+    const question = {
       id: Math.random().toString(),
       question: currentQuestion,
       correct_answer: correctAnswer,
       options: allOptions,
-      level,
-      quiz_id: quizData.id
-    });
+      level: selectedLevel,
+      quiz_id: targetQuizId
+    };
+
+    if (onAddQuestion) {
+      onAddQuestion(question);
+    }
 
     setCurrentQuestion("");
     setCorrectAnswer("");
     setOptions(["", "", "", ""]);
-    setLevel(1);
+    setSelectedLevel(1);
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold">Add Questions</h3>
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold">Add Questions</h3>
+        {onBack && (
+          <Button variant="outline" onClick={onBack}>
+            Back to Quiz
+          </Button>
+        )}
+      </div>
       <div className="flex gap-4">
         <div className="flex-1">
           <Input
@@ -72,8 +90,8 @@ export const QuestionForm = ({ onAddQuestion }: QuestionFormProps) => {
           />
         </div>
         <Select
-          value={level.toString()}
-          onValueChange={(value) => setLevel(parseInt(value))}
+          value={selectedLevel.toString()}
+          onValueChange={(value) => setSelectedLevel(parseInt(value))}
         >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select Level" />
