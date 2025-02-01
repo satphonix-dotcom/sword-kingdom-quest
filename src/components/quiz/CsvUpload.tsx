@@ -23,24 +23,17 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
   };
 
   const validateCsvRow = (row: string[], rowIndex: number): string | null => {
+    // Remove any empty strings or whitespace-only strings
+    const cleanedRow = row.map(cell => cell.trim()).filter(cell => cell.length > 0);
+
     // Check if row has exactly 6 columns (question, correct answer, 4 options)
-    if (row.length !== 6) {
-      return `Row ${rowIndex + 1} must have exactly 6 columns (question, correct answer, and 4 options)`;
+    if (cleanedRow.length !== 6) {
+      return `Row ${rowIndex + 1} must contain exactly 6 columns: question, correct answer, and 4 options. Found ${cleanedRow.length} columns.`;
     }
 
-    // Check if any field is empty
-    const emptyFields = row.map((field, index) => ({
-      field: field.trim(),
-      index
-    })).filter(({ field }) => field.length === 0);
-
-    if (emptyFields.length > 0) {
-      const fieldNames = emptyFields.map(({ index }) => {
-        if (index === 0) return "question";
-        if (index === 1) return "correct answer";
-        return `option ${index - 1}`;
-      });
-      return `Row ${rowIndex + 1} has empty ${fieldNames.join(", ")}`;
+    // Check if any field is empty after trimming
+    if (cleanedRow.some(field => !field)) {
+      return `Row ${rowIndex + 1} contains empty fields. All fields must have content.`;
     }
 
     return null;
@@ -63,11 +56,16 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
         const text = e.target?.result as string;
         const rows = text.split('\n')
           .map(row => row.split(',').map(cell => cell.trim()))
-          .filter(row => row.length > 1 && row.some(cell => cell.length > 0));
+          .filter(row => row.length > 1); // Filter out empty rows
         
         // Skip header row if it exists
         const dataRows = rows[0][0].toLowerCase().includes('question') ? rows.slice(1) : rows;
         
+        if (dataRows.length === 0) {
+          setError("No valid data rows found in the CSV file.");
+          return;
+        }
+
         // Validate all rows first
         const validationErrors: string[] = [];
         dataRows.forEach((row, index) => {
@@ -81,7 +79,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
         }
 
         const questions: Question[] = dataRows.map(row => {
-          const [question, correctAnswer, ...options] = row;
+          const [question, correctAnswer, ...options] = row.map(cell => cell.trim());
           return {
             id: crypto.randomUUID(),
             question,
@@ -106,7 +104,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
 
       } catch (error: any) {
         console.error('CSV upload error:', error);
-        setError(error.message || "Failed to parse CSV file");
+        setError(error.message || "Failed to parse CSV file. Please check the format and try again.");
       }
     };
 
@@ -142,10 +140,16 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
       <div className="space-y-2">
         <p className="text-sm text-gray-400 font-medium">CSV Format Requirements:</p>
         <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
-          <li>Each row must contain exactly 6 columns</li>
-          <li>Column order: question, correct_answer, option1, option2, option3, option4</li>
-          <li>No empty fields allowed</li>
+          <li>Each row must contain exactly 6 columns in this order:</li>
+          <li className="ml-6">1. Question text</li>
+          <li className="ml-6">2. Correct answer</li>
+          <li className="ml-6">3. Option 1</li>
+          <li className="ml-6">4. Option 2</li>
+          <li className="ml-6">5. Option 3</li>
+          <li className="ml-6">6. Option 4</li>
+          <li>No empty fields are allowed</li>
           <li>Headers are optional (will be skipped if present)</li>
+          <li>Example: What is 2+2?,4,2,3,4,5</li>
         </ul>
       </div>
     </div>
