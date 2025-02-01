@@ -6,6 +6,13 @@ import Auth from '@/pages/Auth';
 import Levels from '@/pages/Levels';
 import Quiz from '@/pages/Quiz';
 import Profile from '@/pages/Profile';
+import About from '@/pages/About';
+import LeaderboardPage from '@/pages/LeaderboardPage';
+import FAQ from '@/pages/FAQ';
+import LearnMore from '@/pages/LearnMore';
+import Privacy from '@/pages/Privacy';
+import Support from '@/pages/Support';
+import StudyGuide from '@/pages/StudyGuide';
 
 const queryClient = new QueryClient();
 
@@ -19,6 +26,13 @@ function App() {
           <Route path="/levels" element={<Levels />} />
           <Route path="/quiz/:id" element={<Quiz />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/leaderboard" element={<LeaderboardPage />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/learn-more" element={<LearnMore />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/study-guide" element={<StudyGuide />} />
         </Routes>
       </Router>
       <Toaster />
