@@ -13,6 +13,7 @@ import LearnMore from '@/pages/LearnMore';
 import Privacy from '@/pages/Privacy';
 import Support from '@/pages/Support';
 import StudyGuide from '@/pages/StudyGuide';
+import Admin from '@/pages/Admin';
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/support" element={<Support />} />
           <Route path="/study-guide" element={<StudyGuide />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </Router>
       <Toaster />
