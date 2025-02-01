@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { QuestionForm } from "./QuestionForm";
 import { QuestionsList } from "./QuestionsList";
 import { CsvUpload } from "./CsvUpload";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,22 +21,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   const [title, setTitle] = useState(editQuiz?.title || "");
   const [description, setDescription] = useState(editQuiz?.description || "");
   const [timeLimit, setTimeLimit] = useState(editQuiz?.time_limit?.toString() || "30");
-  const [showQuestionForm, setShowQuestionForm] = useState(false);
-  const [selectedLevel, setSelectedLevel] = useState<string>("1");
   const [questions, setQuestions] = useState<Question[]>([]);
-
-  const { data: levels } = useQuery({
-    queryKey: ["levels"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("levels")
-        .select("*")
-        .order("order_number");
-
-      if (error) throw error;
-      return data;
-    },
-  });
 
   // Fetch questions when editing a quiz
   const { data: quizQuestions } = useQuery({
@@ -51,7 +34,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
         .eq("quiz_id", editQuiz.id);
 
       if (error) throw error;
-      return data;
+      return data as Question[];
     },
     enabled: !!editQuiz?.id,
   });
@@ -117,19 +100,6 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
     setQuestions([...questions, ...importedQuestions]);
   };
 
-  if (showQuestionForm && editQuiz) {
-    return (
-      <div className="space-y-6">
-        <QuestionForm
-          quizId={editQuiz.id}
-          onBack={() => setShowQuestionForm(false)}
-          level={parseInt(selectedLevel)}
-        />
-        <CsvUpload onQuestionsImported={handleQuestionsImported} />
-      </div>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto bg-[#020817] p-8 rounded-lg">
       <Input
@@ -162,14 +132,6 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
         <CsvUpload 
           onQuestionsImported={handleQuestionsImported}
           quizId={editQuiz?.id}
-          level={parseInt(selectedLevel)}
-        />
-      </div>
-
-      <div className="space-y-4">
-        <h3 className="text-white font-semibold">Add Questions</h3>
-        <QuestionForm 
-          onAddQuestion={(question) => setQuestions([...questions, question])}
         />
       </div>
 
