@@ -5,8 +5,55 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, MessageCircle, Phone } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Support = () => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.functions.invoke("send-contact-email", {
+        body: formData,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you as soon as possible.",
+      });
+
+      // Reset form
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate">
       <HomeLink />
@@ -21,13 +68,17 @@ const Support = () => {
               <h2 className="text-2xl font-semibold text-gameGold mb-6">
                 Contact Us
               </h2>
-              <form className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     Name
                   </label>
-                  <Input 
+                  <Input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
                     placeholder="Your name"
+                    required
                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
                   />
                 </div>
@@ -35,9 +86,13 @@ const Support = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     Email
                   </label>
-                  <Input 
+                  <Input
                     type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
                     placeholder="your@email.com"
+                    required
                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
                   />
                 </div>
@@ -45,13 +100,19 @@ const Support = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     Message
                   </label>
-                  <Textarea 
+                  <Textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
                     placeholder="How can we help?"
+                    required
                     className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
                     rows={4}
                   />
                 </div>
-                <Button className="w-full">Send Message</Button>
+                <Button className="w-full" disabled={isLoading}>
+                  {isLoading ? "Sending..." : "Send Message"}
+                </Button>
               </form>
             </CardContent>
           </Card>
