@@ -28,7 +28,6 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   const [selectedLevel, setSelectedLevel] = useState<string>("1");
   const [questions, setQuestions] = useState<Question[]>([]);
 
-  // Fetch levels using React Query
   const { data: levels } = useQuery({
     queryKey: ["levels"],
     queryFn: async () => {
