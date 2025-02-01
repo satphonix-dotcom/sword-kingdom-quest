@@ -1,8 +1,47 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Volume2 } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export const HomeNavigation = () => {
+  const [user, setUser] = React.useState<any>(null);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  React.useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      navigate('/');
+      toast({
+        title: "Signed out successfully",
+        description: "Come back soon!",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error signing out",
+        description: "Please try again.",
+      });
+    }
+  };
+
   return (
     <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
       <div className="flex items-center gap-4">
@@ -26,12 +65,21 @@ export const HomeNavigation = () => {
             <div className="w-1/2 h-full bg-gameGold rounded-full"></div>
           </div>
         </div>
-        <Link 
-          to="/auth" 
-          className="bg-gameGold text-gamePurple px-6 py-2 rounded-md font-semibold hover:bg-gameGold/90 transition-colors"
-        >
-          Sign In
-        </Link>
+        {user ? (
+          <button 
+            onClick={handleSignOut}
+            className="bg-gameGold text-gamePurple px-6 py-2 rounded-md font-semibold hover:bg-gameGold/90 transition-colors"
+          >
+            Sign Out
+          </button>
+        ) : (
+          <Link 
+            to="/auth" 
+            className="bg-gameGold text-gamePurple px-6 py-2 rounded-md font-semibold hover:bg-gameGold/90 transition-colors"
+          >
+            Sign In
+          </Link>
+        )}
       </div>
     </nav>
   );
