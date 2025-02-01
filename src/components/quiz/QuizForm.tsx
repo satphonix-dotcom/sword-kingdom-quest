@@ -7,8 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionForm } from "./QuestionForm";
 import { QuestionsList } from "./QuestionsList";
+import { CsvUpload } from "./CsvUpload";
 import { supabase } from "@/integrations/supabase/client";
-import { Quiz } from "@/types/quiz";
+import { Quiz, Question } from "@/types/quiz";
 import { useToast } from "@/hooks/use-toast";
 
 interface QuizFormProps {
@@ -25,6 +26,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   const [timeLimit, setTimeLimit] = useState(editQuiz?.time_limit?.toString() || "30");
   const [showQuestionForm, setShowQuestionForm] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState<string>("1");
+  const [questions, setQuestions] = useState<Question[]>([]);
 
   // Fetch levels using React Query
   const { data: levels } = useQuery({
@@ -90,18 +92,25 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
     }
   };
 
+  const handleQuestionsImported = (importedQuestions: Question[]) => {
+    setQuestions([...questions, ...importedQuestions]);
+  };
+
   if (showQuestionForm && editQuiz) {
     return (
-      <QuestionForm
-        quizId={editQuiz.id}
-        onBack={() => setShowQuestionForm(false)}
-        level={parseInt(selectedLevel)}
-      />
+      <div className="space-y-6">
+        <QuestionForm
+          quizId={editQuiz.id}
+          onBack={() => setShowQuestionForm(false)}
+          level={parseInt(selectedLevel)}
+        />
+        <CsvUpload onQuestionsImported={handleQuestionsImported} />
+      </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto bg-white p-6 rounded-lg shadow">
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
         <Input
@@ -109,6 +118,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
+          className="w-full"
         />
       </div>
 
@@ -118,6 +128,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          className="min-h-[100px]"
         />
       </div>
 
@@ -129,6 +140,8 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
           value={timeLimit}
           onChange={(e) => setTimeLimit(e.target.value)}
           required
+          min="1"
+          className="w-full"
         />
       </div>
 
@@ -172,7 +185,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
         )}
       </div>
 
-      {editQuiz && <QuestionsList quizId={editQuiz.id} />}
+      {editQuiz && <QuestionsList quizId={editQuiz.id} questions={questions} />}
     </form>
   );
 };
