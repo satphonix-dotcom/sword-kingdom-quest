@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +39,29 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
       return data;
     },
   });
+
+  // Fetch questions when editing a quiz
+  const { data: quizQuestions } = useQuery({
+    queryKey: ["quiz-questions", editQuiz?.id],
+    queryFn: async () => {
+      if (!editQuiz?.id) return null;
+      const { data, error } = await supabase
+        .from("questions")
+        .select("*")
+        .eq("quiz_id", editQuiz.id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!editQuiz?.id,
+  });
+
+  // Update questions state when quiz questions are fetched
+  useEffect(() => {
+    if (quizQuestions) {
+      setQuestions(quizQuestions);
+    }
+  }, [quizQuestions]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
