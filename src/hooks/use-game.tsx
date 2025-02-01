@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
-export const useGame = () => {
+export function useGame() {
   const [gameStarted, setGameStarted] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -34,4 +34,4 @@ export const useGame = () => {
     userId,
     handleLogout,
   };
-};
+}
