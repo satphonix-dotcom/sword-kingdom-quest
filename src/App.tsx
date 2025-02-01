@@ -43,16 +43,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route
-              path="/"
-              element={
-                session ? (
-                  <Index />
-                ) : (
-                  <Navigate to="/auth" replace />
-                )
-              }
-            />
+            <Route path="/" element={<Index />} />
             <Route
               path="/auth"
               element={
