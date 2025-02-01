@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { UserCircle } from 'lucide-react';
 
 export const HomeNavigation = () => {
   const [user, setUser] = React.useState<any>(null);
@@ -76,6 +77,15 @@ export const HomeNavigation = () => {
           <Link to="/" className="text-gameGold hover:text-gameGold/80">Home</Link>
           <Link to="/leaderboard" className="text-gameGold hover:text-gameGold/80">Leaderboard</Link>
           <Link to="/about" className="text-gameGold hover:text-gameGold/80">About</Link>
+          {user && (
+            <Link 
+              to="/profile" 
+              className="text-gameGold hover:text-gameGold/80 flex items-center gap-2"
+            >
+              <UserCircle className="w-5 h-5" />
+              <span>Profile</span>
+            </Link>
+          )}
           {isAdmin && (
             <Link 
               to="/admin" 
