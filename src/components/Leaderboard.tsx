@@ -15,7 +15,7 @@ export const Leaderboard = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("username, points, country")
+        .select("username, points, country, first_name, last_name")
         .order("points", { ascending: false })
         .limit(10);
 
@@ -23,7 +23,9 @@ export const Leaderboard = () => {
 
       return data.map((entry, index) => ({
         rank: index + 1,
-        name: entry.username || "Anonymous",
+        name: entry.first_name && entry.last_name
+          ? `${entry.first_name} ${entry.last_name}`
+          : entry.username || "Anonymous",
         score: entry.points,
         country: entry.country || "Unknown",
       }));
