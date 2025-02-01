@@ -7,6 +7,7 @@ import { QuizManager } from "@/components/QuizManager";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { LevelManager } from "@/components/admin/LevelManager";
 import { LogOut } from "lucide-react";
+import { HomeLink } from "@/components/HomeLink";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -63,6 +64,7 @@ const Admin = () => {
 
   return (
     <div className="container mx-auto py-8">
+      <HomeLink />
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <div className="flex items-center gap-4">
