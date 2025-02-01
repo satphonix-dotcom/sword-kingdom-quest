@@ -43,51 +43,52 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
   }, [timeLeft, isQuizComplete]);
 
   const fetchQuestions = async () => {
-    const { data: quizData, error: quizError } = await supabase
-      .from("quizzes")
-      .select("time_limit")
-      .eq("id", questions[0]?.quiz_id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("questions")
+        .select(`
+          *,
+          quiz:quizzes (
+            time_limit
+          )
+        `)
+        .eq("level", level)
+        .order("created_at");
 
-    if (quizError) {
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch questions",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        return;
+      }
+
+      const timeLimit = data[0]?.quiz?.time_limit || 30;
+      setQuizTimeLimit(timeLimit);
+      setTimeLeft(timeLimit * 60);
+
+      const transformedQuestions: Question[] = data.map(q => ({
+        id: q.id,
+        question: q.question,
+        correct_answer: q.correct_answer,
+        options: Array.isArray(q.options) ? q.options.map(opt => String(opt)) : [],
+        level: q.level,
+        quiz_id: q.quiz_id
+      }));
+
+      setQuestions(transformedQuestions);
+    } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to fetch quiz details",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
-      return;
     }
-
-    if (quizData?.time_limit) {
-      setQuizTimeLimit(quizData.time_limit);
-      setTimeLeft(quizData.time_limit * 60);
-    }
-
-    const { data, error } = await supabase
-      .from("questions")
-      .select("*")
-      .eq("level", level)
-      .order("created_at");
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch questions",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const transformedQuestions: Question[] = (data || []).map(q => ({
-      id: q.id,
-      question: q.question,
-      correct_answer: q.correct_answer,
-      options: Array.isArray(q.options) ? q.options.map(opt => String(opt)) : [],
-      level: q.level,
-      quiz_id: q.quiz_id
-    }));
-
-    setQuestions(transformedQuestions);
   };
 
   const handleAnswerSelect = (answer: string) => {
@@ -98,7 +99,7 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
     setIsQuizComplete(true);
     
     const { error } = await supabase.from("quiz_responses").insert({
-      quiz_id: questions[0].quiz_id,
+      quiz_id: questions[0]?.quiz_id,
       user_id: (await supabase.auth.getUser()).data.user?.id,
       answers: questions.map((q, i) => ({
         question_id: q.id,
