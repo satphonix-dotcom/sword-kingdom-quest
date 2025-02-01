@@ -99,11 +99,11 @@ const Levels = () => {
                         onClick={() => handleQuizClick(quiz.id)}
                       >
                         <CardContent className="p-4">
-                          <h3 className="text-xl font-semibold text-slate-900">{quiz.title}</h3>
+                          <h3 className="text-xl font-semibold text-white">{quiz.title}</h3>
                           {quiz.description && (
-                            <p className="text-slate-600 mt-1">{quiz.description}</p>
+                            <p className="text-slate-300 mt-1">{quiz.description}</p>
                           )}
-                          <p className="text-sm text-slate-500 mt-2">
+                          <p className="text-sm text-slate-400 mt-2">
                             Time limit: {quiz.time_limit || 'No'} minutes
                           </p>
                         </CardContent>
