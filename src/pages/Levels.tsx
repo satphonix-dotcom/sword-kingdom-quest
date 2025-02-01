@@ -8,6 +8,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { LevelSelection } from '@/components/quiz/LevelSelection';
 import { QuizList } from '@/components/quiz/QuizList';
+import { Quiz } from '@/types/quiz';
 
 const Levels = () => {
   const navigate = useNavigate();
@@ -53,8 +54,8 @@ const Levels = () => {
     setSelectedLevel(null);
   };
 
-  const handleQuizClick = (quizId: string) => {
-    navigate(`/quiz/${quizId}`);
+  const handleQuizEdit = (quiz: Quiz) => {
+    navigate(`/quiz/${quiz.id}`);
   };
 
   if (isLoadingLevels) {
@@ -92,7 +93,7 @@ const Levels = () => {
                 <QuizList 
                   quizzes={quizzes}
                   isLoading={isLoadingQuizzes}
-                  onQuizClick={handleQuizClick}
+                  onEdit={handleQuizEdit}
                 />
               </CardContent>
             </Card>
