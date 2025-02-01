@@ -2,9 +2,8 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { LogOut } from 'lucide-react';
 import { GameLogo } from '@/components/GameLogo';
-import { LevelButton } from '@/components/LevelButton';
-import { Leaderboard } from '@/components/Leaderboard';
 import { LevelContent } from '@/components/LevelContent';
+import { LevelSelection } from './LevelSelection';
 
 interface GameContentProps {
   userId: string | null;
@@ -44,34 +43,7 @@ export const GameContent = ({
             onBack={handleBackToLevels}
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <LevelButton
-              level={1}
-              title="The Basics"
-              description="Master the fundamentals"
-              points={100}
-              onClick={() => handleLevelSelect(1)}
-            />
-            <LevelButton
-              level={2}
-              title="Advanced Concepts"
-              description="Dive deeper into complexity"
-              points={200}
-              onClick={() => handleLevelSelect(2)}
-              isLocked={true}
-            />
-            <LevelButton
-              level={3}
-              title="Expert Challenges"
-              description="Test your mastery"
-              points={300}
-              onClick={() => handleLevelSelect(3)}
-              isLocked={true}
-            />
-            <div className="md:col-span-2 lg:col-span-3">
-              <Leaderboard />
-            </div>
-          </div>
+          <LevelSelection onLevelSelect={handleLevelSelect} />
         )}
       </div>
     </div>

@@ -2,12 +2,14 @@ import { ProfileCard } from "./ProfileCard";
 import { PointsCard } from "./PointsCard";
 import { RankCard } from "./RankCard";
 
+interface Profile {
+  username: string;
+  points: number;
+  country: string | null;
+}
+
 interface DashboardStatsProps {
-  profile: {
-    username: string;
-    points: number;
-    country: string | null;
-  };
+  profile: Profile;
   leaderboardPosition: number;
 }
 
