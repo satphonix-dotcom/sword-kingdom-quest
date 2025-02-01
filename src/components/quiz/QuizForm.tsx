@@ -25,7 +25,6 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
   const [questions, setQuestions] = useState<Question[]>([]);
 
-  // Fetch levels for the dropdown
   const { data: levels } = useQuery({
     queryKey: ["levels"],
     queryFn: async () => {
@@ -39,7 +38,6 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
     },
   });
 
-  // Fetch questions when editing a quiz
   const { data: quizQuestions } = useQuery({
     queryKey: ["quiz-questions", editQuiz?.id],
     queryFn: async () => {
@@ -55,7 +53,6 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
     enabled: !!editQuiz?.id,
   });
 
-  // Update questions state when quiz questions are fetched
   useEffect(() => {
     if (quizQuestions) {
       const convertedQuestions: Question[] = quizQuestions.map(q => ({
@@ -83,28 +80,51 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
     }
 
     try {
-      if (editQuiz) {
-        const { error } = await supabase
+      let quizId = editQuiz?.id;
+
+      if (!quizId) {
+        // Create new quiz
+        const { data: newQuiz, error: quizError } = await supabase
+          .from("quizzes")
+          .insert([
+            {
+              title,
+              description,
+              created_by: userId,
+              time_limit: parseInt(timeLimit),
+            },
+          ])
+          .select()
+          .single();
+
+        if (quizError) throw quizError;
+        quizId = newQuiz.id;
+      } else {
+        // Update existing quiz
+        const { error: updateError } = await supabase
           .from("quizzes")
           .update({
             title,
             description,
             time_limit: parseInt(timeLimit),
           })
-          .eq("id", editQuiz.id);
+          .eq("id", quizId);
 
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from("quizzes").insert([
-          {
-            title,
-            description,
-            created_by: userId,
-            time_limit: parseInt(timeLimit),
-          },
-        ]);
+        if (updateError) throw updateError;
+      }
 
-        if (error) throw error;
+      // Insert or update questions
+      if (questions.length > 0) {
+        const questionsToInsert = questions.map(q => ({
+          ...q,
+          quiz_id: quizId
+        }));
+
+        const { error: questionsError } = await supabase
+          .from("questions")
+          .insert(questionsToInsert);
+
+        if (questionsError) throw questionsError;
       }
 
       toast({
@@ -177,7 +197,6 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
         <h3 className="text-white font-semibold">Import Questions from CSV</h3>
         <CsvUpload 
           onQuestionsImported={handleQuestionsImported}
-          quizId={editQuiz?.id}
           level={selectedLevel}
         />
       </div>

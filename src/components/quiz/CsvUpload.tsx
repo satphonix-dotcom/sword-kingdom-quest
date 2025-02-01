@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Question } from "@/types/quiz";
-import { supabase } from "@/integrations/supabase/client";
 
 interface CsvUploadProps {
   onQuestionsImported: (questions: Question[]) => void;
@@ -10,7 +9,7 @@ interface CsvUploadProps {
   level?: number;
 }
 
-export const CsvUpload = ({ onQuestionsImported, quizId, level = 1 }: CsvUploadProps) => {
+export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) => {
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
 
@@ -21,9 +20,7 @@ export const CsvUpload = ({ onQuestionsImported, quizId, level = 1 }: CsvUploadP
   };
 
   const validateCsvRow = (row: string[]): boolean => {
-    // Check if we have question, correct answer, and exactly 4 options
-    if (row.length !== 6) return false; // question + correct_answer + 4 options = 6 columns
-    // Check if all fields are non-empty
+    if (row.length !== 6) return false;
     return row.every(field => field.trim().length > 0);
   };
 
@@ -37,26 +34,15 @@ export const CsvUpload = ({ onQuestionsImported, quizId, level = 1 }: CsvUploadP
       return;
     }
 
-    if (!quizId) {
-      toast({
-        title: "Error",
-        description: "No quiz selected to import questions into",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
         const text = e.target?.result as string;
         const rows = text.split('\n')
           .map(row => row.split(',').map(cell => cell.trim()))
-          .filter(row => row.length > 1); // Filter out empty rows
+          .filter(row => row.length > 1);
         
-        // Remove header row if present
         const dataRows = rows[0][0].toLowerCase().includes('question') ? rows.slice(1) : rows;
-        
         const validRows = dataRows.filter(validateCsvRow);
 
         if (validRows.length === 0) {
@@ -76,25 +62,9 @@ export const CsvUpload = ({ onQuestionsImported, quizId, level = 1 }: CsvUploadP
             correct_answer: correctAnswer,
             options: [...new Set([...options, correctAnswer])].sort(() => Math.random() - 0.5),
             level,
-            quiz_id: quizId
+            quiz_id: crypto.randomUUID() // Temporary ID, will be replaced when quiz is created
           };
         });
-
-        // Insert questions into database
-        const { error } = await supabase
-          .from('questions')
-          .insert(questions.map(q => ({
-            question: q.question,
-            correct_answer: q.correct_answer,
-            options: q.options,
-            level: q.level,
-            quiz_id: q.quiz_id
-          })));
-
-        if (error) {
-          console.error('Error inserting questions:', error);
-          throw error;
-        }
 
         onQuestionsImported(questions);
         toast({
