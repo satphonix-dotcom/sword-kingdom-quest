@@ -30,7 +30,7 @@ export const HeroBanner = () => {
       </p>
       <div className="flex gap-4 justify-center">
         <Link 
-          to={user ? "/" : "/auth"} 
+          to={user ? "/levels" : "/auth"} 
           className="bg-gameGold text-gamePurple px-8 py-3 rounded-md font-semibold text-lg hover:bg-gameGold/90 transition-colors"
         >
           {user ? "Start Your Quest" : "Sign Up Now"}

@@ -9,6 +9,7 @@ import FAQ from "./pages/FAQ";
 import Support from "./pages/Support";
 import Privacy from "./pages/Privacy";
 import LearnMore from "./pages/LearnMore";
+import Levels from "./pages/Levels";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/support" element={<Support />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/learn-more" element={<LearnMore />} />
+        <Route path="/levels" element={<Levels />} />
       </Routes>
     </Router>
   );
