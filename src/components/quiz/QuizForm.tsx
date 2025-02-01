@@ -45,7 +45,9 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
       // Convert the Supabase data to Question type, ensuring options is string[]
       const convertedQuestions: Question[] = quizQuestions.map(q => ({
         ...q,
-        options: Array.isArray(q.options) ? q.options : [],
+        options: Array.isArray(q.options) 
+          ? q.options.map(opt => String(opt)) // Convert each option to string
+          : []
       }));
       setQuestions(convertedQuestions);
     }
