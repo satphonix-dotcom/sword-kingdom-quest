@@ -1,84 +1,51 @@
-import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { QuestionForm } from "./QuestionForm";
+import { QuestionsList } from "./QuestionsList";
 import { supabase } from "@/integrations/supabase/client";
-import { Question, QuizFormProps, Quiz } from "@/types/quiz";
-import { QuizMetadata } from "./QuizMetadata";
-import { QuizQuestions } from "./QuizQuestions";
-import { QuizActions } from "./QuizActions";
+import { Quiz } from "@/types/quiz";
+import { useToast } from "@/hooks/use-toast";
 
-interface ExtendedQuizFormProps extends QuizFormProps {
+interface QuizFormProps {
+  userId: string | null;
+  onSuccess: () => void;
+  onCancel: () => void;
   editQuiz?: Quiz;
 }
 
-export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuizFormProps) => {
+export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProps) => {
   const { toast } = useToast();
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [timeLimit, setTimeLimit] = useState<number | null>(null);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [title, setTitle] = useState(editQuiz?.title || "");
+  const [description, setDescription] = useState(editQuiz?.description || "");
+  const [timeLimit, setTimeLimit] = useState(editQuiz?.time_limit?.toString() || "30");
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState<string>("1");
 
-  useEffect(() => {
-    const loadQuizData = async () => {
-      if (editQuiz) {
-        setTitle(editQuiz.title);
-        setDescription(editQuiz.description || "");
-        setTimeLimit(editQuiz.time_limit);
+  // Fetch levels using React Query
+  const { data: levels } = useQuery({
+    queryKey: ["levels"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("levels")
+        .select("*")
+        .order("order_number");
 
-        // Fetch questions for this quiz
-        const { data: quizQuestions, error } = await supabase
-          .from("questions")
-          .select("*")
-          .eq("quiz_id", editQuiz.id);
+      if (error) throw error;
+      return data;
+    },
+  });
 
-        if (error) {
-          toast({
-            title: "Error",
-            description: "Failed to load quiz questions",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        // Transform the data to match the Question interface
-        const transformedQuestions: Question[] = quizQuestions.map(q => ({
-          id: q.id,
-          question: q.question,
-          correct_answer: q.correct_answer,
-          options: Array.isArray(q.options) ? q.options.map(opt => String(opt)) : [],
-          level: q.level,
-          quiz_id: q.quiz_id
-        }));
-
-        setQuestions(transformedQuestions);
-      }
-    };
-
-    loadQuizData();
-  }, [editQuiz]);
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!userId) {
       toast({
         title: "Error",
-        description: "User not authenticated",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!title.trim()) {
-      toast({
-        title: "Error",
-        description: "Quiz title is required",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (questions.length === 0) {
-      toast({
-        title: "Error",
-        description: "Add at least one question",
+        description: "You must be logged in to create a quiz",
         variant: "destructive",
       });
       return;
@@ -86,106 +53,126 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: ExtendedQuiz
 
     try {
       if (editQuiz) {
-        // Update existing quiz
-        const { error: quizError } = await supabase
+        const { error } = await supabase
           .from("quizzes")
           .update({
             title,
             description,
-            time_limit: timeLimit,
-            updated_at: new Date().toISOString(),
+            time_limit: parseInt(timeLimit),
           })
           .eq("id", editQuiz.id);
 
-        if (quizError) throw quizError;
-
-        // Delete existing questions
-        const { error: deleteError } = await supabase
-          .from("questions")
-          .delete()
-          .eq("quiz_id", editQuiz.id);
-
-        if (deleteError) throw deleteError;
-
-        // Insert new questions
-        const { error: questionsError } = await supabase
-          .from("questions")
-          .insert(
-            questions.map(q => ({
-              quiz_id: editQuiz.id,
-              question: q.question,
-              correct_answer: q.correct_answer,
-              options: q.options,
-              level: q.level
-            }))
-          );
-
-        if (questionsError) throw questionsError;
-
+        if (error) throw error;
       } else {
-        // Create new quiz
-        const { data: quizData, error: quizError } = await supabase
-          .from("quizzes")
-          .insert({
+        const { error } = await supabase.from("quizzes").insert([
+          {
             title,
             description,
-            time_limit: timeLimit,
-            created_by: userId
-          })
-          .select()
-          .single();
+            created_by: userId,
+            time_limit: parseInt(timeLimit),
+          },
+        ]);
 
-        if (quizError) throw quizError;
-
-        const { error: questionsError } = await supabase
-          .from("questions")
-          .insert(
-            questions.map(q => ({
-              quiz_id: quizData.id,
-              question: q.question,
-              correct_answer: q.correct_answer,
-              options: q.options,
-              level: q.level
-            }))
-          );
-
-        if (questionsError) throw questionsError;
+        if (error) throw error;
       }
 
       toast({
         title: "Success",
-        description: `Quiz ${editQuiz ? 'updated' : 'created'} successfully`,
+        description: `Quiz ${editQuiz ? "updated" : "created"} successfully`,
       });
-
       onSuccess();
-    } catch (error) {
-      console.error("Error saving quiz:", error);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: `Failed to ${editQuiz ? 'update' : 'create'} quiz`,
+        description: error.message,
         variant: "destructive",
       });
     }
   };
 
+  if (showQuestionForm && editQuiz) {
+    return (
+      <QuestionForm
+        quizId={editQuiz.id}
+        onBack={() => setShowQuestionForm(false)}
+        level={parseInt(selectedLevel)}
+      />
+    );
+  }
+
   return (
-    <div className="space-y-4 p-4 border rounded-lg">
-      <QuizMetadata
-        title={title}
-        description={description}
-        timeLimit={timeLimit}
-        onTitleChange={setTitle}
-        onDescriptionChange={setDescription}
-        onTimeLimitChange={setTimeLimit}
-      />
-      <QuizQuestions 
-        questions={questions}
-        onQuestionsChange={setQuestions}
-      />
-      <QuizActions 
-        onCancel={onCancel}
-        onSubmit={handleSubmit}
-      />
-    </div>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="timeLimit">Time Limit (minutes)</Label>
+        <Input
+          id="timeLimit"
+          type="number"
+          value={timeLimit}
+          onChange={(e) => setTimeLimit(e.target.value)}
+          required
+        />
+      </div>
+
+      {editQuiz && (
+        <div className="space-y-2">
+          <Label htmlFor="level">Level</Label>
+          <Select
+            value={selectedLevel}
+            onValueChange={setSelectedLevel}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a level" />
+            </SelectTrigger>
+            <SelectContent>
+              {levels?.map((level) => (
+                <SelectItem key={level.order_number} value={level.order_number.toString()}>
+                  Level {level.order_number}: {level.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      <div className="flex justify-between">
+        <div className="space-x-2">
+          <Button type="submit">
+            {editQuiz ? "Update Quiz" : "Create Quiz"}
+          </Button>
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+        </div>
+        {editQuiz && (
+          <Button
+            type="button"
+            onClick={() => setShowQuestionForm(true)}
+          >
+            Add Questions
+          </Button>
+        )}
+      </div>
+
+      {editQuiz && <QuestionsList quizId={editQuiz.id} />}
+    </form>
   );
 };
