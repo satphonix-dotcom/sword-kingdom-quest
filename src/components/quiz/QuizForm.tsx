@@ -166,6 +166,8 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
         </div>
       )}
 
+      <CsvUpload onQuestionsImported={handleQuestionsImported} />
+
       <div className="flex justify-between">
         <div className="space-x-2">
           <Button type="submit">
