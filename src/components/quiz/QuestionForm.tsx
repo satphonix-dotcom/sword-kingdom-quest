@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -19,6 +20,19 @@ export const QuestionForm = ({ onAddQuestion, quizId, onBack, level = 1 }: Quest
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [options, setOptions] = useState<string[]>(["", "", "", ""]);
   const [selectedLevel, setSelectedLevel] = useState<number>(level);
+
+  const { data: levels } = useQuery({
+    queryKey: ["levels"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("levels")
+        .select("*")
+        .order("order_number");
+
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const handleAddQuestion = async () => {
     if (!currentQuestion.trim() || !correctAnswer.trim() || options.some(opt => !opt.trim())) {
@@ -87,9 +101,11 @@ export const QuestionForm = ({ onAddQuestion, quizId, onBack, level = 1 }: Quest
             <SelectValue placeholder="Select Level" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1">Level 1 (Beginner)</SelectItem>
-            <SelectItem value="2">Level 2 (Intermediate)</SelectItem>
-            <SelectItem value="3">Level 3 (Advanced)</SelectItem>
+            {levels?.map((level) => (
+              <SelectItem key={level.id} value={level.order_number.toString()}>
+                Level {level.order_number} ({level.title})
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
