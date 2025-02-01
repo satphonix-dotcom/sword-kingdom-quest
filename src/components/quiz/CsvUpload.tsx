@@ -6,9 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 
 interface CsvUploadProps {
   onQuestionsImported: (questions: Question[]) => void;
+  quizId?: string;
+  level?: number;
 }
 
-export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
+export const CsvUpload = ({ onQuestionsImported, quizId, level = 1 }: CsvUploadProps) => {
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
 
@@ -16,6 +18,13 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
     }
+  };
+
+  const validateCsvRow = (row: string[]): boolean => {
+    // Check if we have at least question, correct answer, and one option
+    if (row.length < 3) return false;
+    // Check if all fields are non-empty
+    return row.every(field => field.trim().length > 0);
   };
 
   const handleUpload = async () => {
@@ -28,48 +37,81 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
       return;
     }
 
-    const { data: quizData } = await supabase
-      .from("quizzes")
-      .select("id")
-      .limit(1)
-      .single();
-
-    if (!quizData?.id) {
+    if (!quizId) {
       toast({
         title: "Error",
-        description: "No quiz found to import questions into",
+        description: "No quiz selected to import questions into",
         variant: "destructive",
       });
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const text = e.target?.result as string;
-        const rows = text.split('\n').filter(row => row.trim());
+        const rows = text.split('\n')
+          .map(row => row.split(',').map(cell => cell.trim()))
+          .filter(row => row.length > 1); // Filter out empty rows
         
-        const questions: Question[] = rows.slice(1).map(row => {
-          const [question, correctAnswer, ...options] = row.split(',').map(cell => cell.trim());
+        // Remove header row if present
+        const dataRows = rows[0][0].toLowerCase().includes('question') ? rows.slice(1) : rows;
+        
+        const validRows = dataRows.filter(validateCsvRow);
+
+        if (validRows.length === 0) {
+          toast({
+            title: "Error",
+            description: "No valid questions found in CSV file",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const questions: Question[] = validRows.map(row => {
+          const [question, correctAnswer, ...options] = row;
           return {
-            id: Math.random().toString(),
+            id: crypto.randomUUID(),
             question,
             correct_answer: correctAnswer,
-            options: [...options, correctAnswer].sort(() => Math.random() - 0.5),
-            level: 1,
-            quiz_id: quizData.id
+            options: [...new Set([...options, correctAnswer])].sort(() => Math.random() - 0.5),
+            level,
+            quiz_id: quizId
           };
         });
+
+        // Insert questions into database
+        const { error } = await supabase
+          .from('questions')
+          .insert(questions.map(q => ({
+            question: q.question,
+            correct_answer: q.correct_answer,
+            options: q.options,
+            level: q.level,
+            quiz_id: q.quiz_id
+          })));
+
+        if (error) {
+          console.error('Error inserting questions:', error);
+          throw error;
+        }
 
         onQuestionsImported(questions);
         toast({
           title: "Success",
           description: `Imported ${questions.length} questions`,
         });
-      } catch (error) {
+
+        // Clear the file input
+        setFile(null);
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+
+      } catch (error: any) {
+        console.error('CSV upload error:', error);
         toast({
           title: "Error",
-          description: "Failed to parse CSV file",
+          description: error.message || "Failed to parse CSV file",
           variant: "destructive",
         });
       }
@@ -89,6 +131,7 @@ export const CsvUpload = ({ onQuestionsImported }: CsvUploadProps) => {
         />
         <Button 
           onClick={handleUpload}
+          disabled={!file}
           className="bg-blue-600 text-white hover:bg-blue-700"
         >
           Upload

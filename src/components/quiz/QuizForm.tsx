@@ -136,7 +136,11 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
 
       <div className="space-y-4">
         <h3 className="text-white font-semibold">Import Questions from CSV</h3>
-        <CsvUpload onQuestionsImported={handleQuestionsImported} />
+        <CsvUpload 
+          onQuestionsImported={handleQuestionsImported}
+          quizId={editQuiz?.id}
+          level={parseInt(selectedLevel)}
+        />
       </div>
 
       <div className="space-y-4">
