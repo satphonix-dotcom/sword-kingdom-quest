@@ -1,6 +1,9 @@
 import React from "react";
 import { useQuiz } from "@/hooks/use-quiz";
 import { QuizContent } from "./quiz/QuizContent";
+import { useQuizResponse } from "@/hooks/use-quiz-response";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LevelContentProps {
   level: number;
@@ -9,6 +12,22 @@ interface LevelContentProps {
 }
 
 export const LevelContent = ({ level, onBack, quizId }: LevelContentProps) => {
+  const { data: quiz } = useQuery({
+    queryKey: ['quiz', quizId],
+    queryFn: async () => {
+      if (!quizId) return null;
+      const { data } = await supabase
+        .from('quizzes')
+        .select('*')
+        .eq('id', quizId)
+        .single();
+      return data;
+    },
+    enabled: !!quizId,
+  });
+
+  const { isPerfectScore } = useQuizResponse(quiz || { id: '' });
+
   const {
     questions,
     currentQuestionIndex,
@@ -34,6 +53,7 @@ export const LevelContent = ({ level, onBack, quizId }: LevelContentProps) => {
       timeLeft={timeLeft}
       quizTimeLimit={quizTimeLimit}
       showingAnswer={showingAnswer}
+      isPerfectScore={isPerfectScore}
       onAnswerSelect={handleAnswerSelect}
       onNext={handleNextQuestion}
       onBack={onBack}

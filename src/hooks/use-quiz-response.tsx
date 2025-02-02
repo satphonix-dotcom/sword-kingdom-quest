@@ -25,10 +25,11 @@ export const useQuizResponse = (quiz: Quiz) => {
       if (!response) return null;
 
       const totalQuestions = response.questions?.questions?.length || 0;
+      const isPerfectScore = response.score === totalQuestions;
       
       return {
         ...response,
-        isPerfectScore: response.score === totalQuestions
+        isPerfectScore
       };
     },
   });
@@ -36,6 +37,7 @@ export const useQuizResponse = (quiz: Quiz) => {
   return {
     isCompleted: !!quizResponse,
     isPerfectScore: quizResponse?.isPerfectScore,
-    score: quizResponse?.score
+    score: quizResponse?.score,
+    hasAttempted: !!quizResponse
   };
 };
