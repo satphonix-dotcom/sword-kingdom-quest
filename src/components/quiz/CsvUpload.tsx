@@ -40,6 +40,12 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
       return `Row ${rowIndex + 1}: ${fieldName} cannot be empty`;
     }
 
+    // Validate that the correct answer appears in the options
+    const [, correctAnswer, ...options] = cleanedRow;
+    if (!options.includes(correctAnswer)) {
+      return `Row ${rowIndex + 1}: Correct answer "${correctAnswer}" must be one of the options`;
+    }
+
     return null;
   };
 
@@ -88,7 +94,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
           return;
         }
 
-        // Process valid rows into questions
+        // Process valid rows into questions that match the database schema
         const questions: Question[] = dataRows.map(row => {
           const [question, correctAnswer, ...options] = row.map(cell => cell.trim());
           return {
@@ -153,12 +159,10 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
         <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
           <li>File must be in CSV format (.csv)</li>
           <li>Each row must contain exactly 6 columns in this order:</li>
-          <li className="ml-6">1. Question text</li>
-          <li className="ml-6">2. Correct answer</li>
-          <li className="ml-6">3. Option 1</li>
-          <li className="ml-6">4. Option 2</li>
-          <li className="ml-6">5. Option 3</li>
-          <li className="ml-6">6. Option 4</li>
+          <li className="ml-6">1. Question text (maps to question column)</li>
+          <li className="ml-6">2. Correct answer (maps to correct_answer column)</li>
+          <li className="ml-6">3-6. Four options (stored as JSON in options column)</li>
+          <li>The correct answer must be one of the options</li>
           <li>No empty fields are allowed</li>
           <li>Headers are optional (will be skipped if present)</li>
           <li>Example row: What is 2+2?,4,2,3,4,5</li>
