@@ -25,19 +25,23 @@ export const useQuizScore = () => {
     selectedAnswer: string | null,
     currentQuestionIndex: number
   ) => {
-    // Don't add to score during completion, use the current score
-    const finalScore = await handleQuizComplete(
+    // Calculate the final score, ensuring it doesn't exceed the total number of questions
+    const lastQuestionCorrect = selectedAnswer === questions[currentQuestionIndex]?.correct_answer;
+    const rawScore = currentScore + (lastQuestionCorrect ? 1 : 0);
+    const finalScore = Math.min(rawScore, questions.length);
+    
+    const completionScore = await handleQuizComplete(
       hasAttempted,
       questions,
-      currentScore,
+      finalScore,
       selectedAnswer,
       currentQuestionIndex
     );
     
-    if (finalScore !== null) {
+    if (completionScore !== null) {
       setScore(finalScore);
     }
-    return finalScore;
+    return completionScore;
   };
 
   return {
