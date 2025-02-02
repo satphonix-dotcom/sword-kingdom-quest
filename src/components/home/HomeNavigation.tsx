@@ -2,12 +2,13 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { UserCircle, Menu, X } from 'lucide-react';
+import { UserCircle, Menu, X, Trophy } from 'lucide-react';
 
 export const HomeNavigation = () => {
   const [user, setUser] = React.useState<any>(null);
   const [isAdmin, setIsAdmin] = React.useState(false);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [userPoints, setUserPoints] = React.useState(0);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -17,6 +18,7 @@ export const HomeNavigation = () => {
       setUser(session?.user ?? null);
       if (session?.user) {
         checkAdminStatus(session.user.id);
+        fetchUserPoints(session.user.id);
       }
     });
 
@@ -27,13 +29,25 @@ export const HomeNavigation = () => {
       setUser(session?.user ?? null);
       if (session?.user) {
         checkAdminStatus(session.user.id);
+        fetchUserPoints(session.user.id);
       } else {
         setIsAdmin(false);
+        setUserPoints(0);
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchUserPoints = async (userId: string) => {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('points')
+      .eq('id', userId)
+      .single();
+    
+    setUserPoints(profile?.points || 0);
+  };
 
   const checkAdminStatus = async (userId: string) => {
     const { data: profile } = await supabase
@@ -99,13 +113,19 @@ export const HomeNavigation = () => {
             <Link to="/leaderboard" className="text-gameGold hover:text-gameGold/80">Leaderboard</Link>
             <Link to="/about" className="text-gameGold hover:text-gameGold/80">About</Link>
             {user && (
-              <Link 
-                to="/profile" 
-                className="text-gameGold hover:text-gameGold/80 flex items-center gap-2"
-              >
-                <UserCircle className="w-5 h-5" />
-                <span>Profile</span>
-              </Link>
+              <>
+                <Link 
+                  to="/profile" 
+                  className="text-gameGold hover:text-gameGold/80 flex items-center gap-2"
+                >
+                  <UserCircle className="w-5 h-5" />
+                  <span>Profile</span>
+                </Link>
+                <div className="flex items-center gap-2 text-gameGold">
+                  <Trophy className="w-5 h-5" />
+                  <span>{userPoints} points</span>
+                </div>
+              </>
             )}
             {isAdmin && (
               <Link 
@@ -160,14 +180,20 @@ export const HomeNavigation = () => {
               About
             </Link>
             {user && (
-              <Link 
-                to="/profile" 
-                className="text-gameGold hover:text-gameGold/80 flex items-center gap-2 py-2"
-                onClick={closeMenu}
-              >
-                <UserCircle className="w-5 h-5" />
-                <span>Profile</span>
-              </Link>
+              <>
+                <Link 
+                  to="/profile" 
+                  className="text-gameGold hover:text-gameGold/80 flex items-center gap-2 py-2"
+                  onClick={closeMenu}
+                >
+                  <UserCircle className="w-5 h-5" />
+                  <span>Profile</span>
+                </Link>
+                <div className="flex items-center gap-2 text-gameGold py-2">
+                  <Trophy className="w-5 h-5" />
+                  <span>{userPoints} points</span>
+                </div>
+              </>
             )}
             {isAdmin && (
               <Link 
