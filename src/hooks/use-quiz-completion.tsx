@@ -1,44 +1,15 @@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Question } from "@/types/quiz";
+import { calculatePointsToAward, awardPoints } from "@/utils/quiz-points";
+import { 
+  getExistingResponse, 
+  updateQuizResponse, 
+  createQuizResponse 
+} from "@/utils/quiz-responses";
 
 export const useQuizCompletion = () => {
   const { toast } = useToast();
-
-  const updateUserPoints = async (pointsToAdd: number, userId: string) => {
-    try {
-      console.log("Starting points update process...");
-      
-      if (!userId) {
-        console.error('No user found for points update');
-        return;
-      }
-
-      console.log(`Attempting to award ${pointsToAdd} points to user ${userId}`);
-      
-      const { error } = await supabase.rpc('increment_user_points', {
-        user_id: userId,
-        points_to_add: pointsToAdd
-      });
-
-      if (error) {
-        console.error('Error updating points:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update points",
-          variant: "destructive",
-        });
-      } else {
-        console.log(`Successfully awarded ${pointsToAdd} points to user ${userId}`);
-        toast({
-          title: "Points Awarded!",
-          description: `You earned ${pointsToAdd} points!`,
-        });
-      }
-    } catch (error) {
-      console.error("Error in updateUserPoints:", error);
-    }
-  };
 
   const handleQuizComplete = async (
     hasAttempted: boolean,
@@ -66,58 +37,40 @@ export const useQuizCompletion = () => {
         .eq("id", questions[0]?.quiz_id)
         .single();
 
-      // Calculate score percentage
-      const scorePercentage = (finalScore / totalQuestions) * 100;
-      console.log(`Score percentage: ${scorePercentage}%`);
-
-      // Only award points for 100% accuracy
-      const pointsToAward = scorePercentage === 100 ? (quiz?.points || 0) : 0;
-      console.log(`Points to award: ${pointsToAward}`);
+      const { scorePercentage, pointsToAward } = calculatePointsToAward(
+        finalScore,
+        totalQuestions,
+        quiz?.points
+      );
 
       // Check if a response already exists
-      const { data: existingResponse } = await supabase
-        .from("quiz_responses")
-        .select("id, score")
-        .eq("quiz_id", questions[0]?.quiz_id)
-        .eq("user_id", user.id)
-        .maybeSingle();
-
+      const existingResponse = await getExistingResponse(questions[0]?.quiz_id, user.id);
       let responseError;
 
       if (existingResponse) {
         // Only update if we haven't achieved a perfect score yet
         if (existingResponse.score < totalQuestions) {
-          console.log("Updating existing response...");
-          const { error } = await supabase
-            .from("quiz_responses")
-            .update({
-              answers: questions.map((q, i) => ({
-                question_id: q.id,
-                selected_answer: i === currentQuestionIndex ? selectedAnswer : null
-              })),
-              score: finalScore,
-              completed_at: new Date().toISOString()
-            })
-            .eq("id", existingResponse.id);
+          const { error } = await updateQuizResponse(
+            existingResponse.id,
+            questions,
+            currentQuestionIndex,
+            selectedAnswer,
+            finalScore
+          );
           responseError = error;
         } else {
           console.log("Perfect score already achieved, no update needed");
           return existingResponse.score;
         }
       } else {
-        // Insert new response
-        console.log("Creating new quiz response...");
-        const { error } = await supabase
-          .from("quiz_responses")
-          .insert({
-            quiz_id: questions[0]?.quiz_id,
-            user_id: user.id,
-            answers: questions.map((q, i) => ({
-              question_id: q.id,
-              selected_answer: i === currentQuestionIndex ? selectedAnswer : null
-            })),
-            score: finalScore
-          });
+        const { error } = await createQuizResponse(
+          questions[0]?.quiz_id,
+          user.id,
+          questions,
+          currentQuestionIndex,
+          selectedAnswer,
+          finalScore
+        );
         responseError = error;
       }
 
@@ -132,8 +85,7 @@ export const useQuizCompletion = () => {
       }
 
       if (pointsToAward > 0) {
-        console.log("Awarding points for perfect score...");
-        await updateUserPoints(pointsToAward, user.id);
+        await awardPoints(user.id, pointsToAward);
       } else if (scorePercentage < 100) {
         console.log("Score below 100%, no points awarded");
         toast({
@@ -151,6 +103,5 @@ export const useQuizCompletion = () => {
 
   return {
     handleQuizComplete,
-    updateUserPoints,
   };
 };
