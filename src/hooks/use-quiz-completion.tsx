@@ -66,9 +66,13 @@ export const useQuizCompletion = () => {
         .eq("id", questions[0]?.quiz_id)
         .single();
 
-      // Only award points for 100% accuracy
+      // Calculate score percentage
       const scorePercentage = (finalScore / totalQuestions) * 100;
-      let pointsToAward = scorePercentage === 100 ? (quiz?.points || 0) : 0;
+      console.log(`Score percentage: ${scorePercentage}%`);
+
+      // Only award points for 100% accuracy
+      const pointsToAward = scorePercentage === 100 ? (quiz?.points || 0) : 0;
+      console.log(`Points to award: ${pointsToAward}`);
 
       // Check if a response already exists
       const { data: existingResponse } = await supabase
@@ -83,6 +87,7 @@ export const useQuizCompletion = () => {
       if (existingResponse) {
         // Only update if we haven't achieved a perfect score yet
         if (existingResponse.score < totalQuestions) {
+          console.log("Updating existing response...");
           const { error } = await supabase
             .from("quiz_responses")
             .update({
@@ -96,11 +101,12 @@ export const useQuizCompletion = () => {
             .eq("id", existingResponse.id);
           responseError = error;
         } else {
-          // If we already have a perfect score, don't update
+          console.log("Perfect score already achieved, no update needed");
           return existingResponse.score;
         }
       } else {
         // Insert new response
+        console.log("Creating new quiz response...");
         const { error } = await supabase
           .from("quiz_responses")
           .insert({
@@ -126,8 +132,10 @@ export const useQuizCompletion = () => {
       }
 
       if (pointsToAward > 0) {
+        console.log("Awarding points for perfect score...");
         await updateUserPoints(pointsToAward, user.id);
       } else if (scorePercentage < 100) {
+        console.log("Score below 100%, no points awarded");
         toast({
           title: "Keep practicing!",
           description: "You can retake this quiz to achieve a perfect score.",
