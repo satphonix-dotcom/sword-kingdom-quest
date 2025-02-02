@@ -38,8 +38,8 @@ export const Leaderboard = () => {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white/10 backdrop-blur-md rounded-lg p-6 animate-fade-in">
-      <h2 className="text-2xl font-bold text-gameGold mb-4 text-center">
+    <div className="w-full max-w-md mx-auto bg-white/10 backdrop-blur-md rounded-lg p-4 md:p-6 animate-fade-in">
+      <h2 className="text-xl md:text-2xl font-bold text-gameGold mb-4 text-center">
         Global Leaderboard
       </h2>
       <div className="space-y-2">

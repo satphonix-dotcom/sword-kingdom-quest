@@ -18,7 +18,7 @@ export const DashboardStats = ({
   leaderboardPosition,
 }: DashboardStatsProps) => {
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
       <ProfileCard username={profile.username} country={profile.country} />
       <PointsCard points={profile.points} />
       <RankCard position={leaderboardPosition} />
