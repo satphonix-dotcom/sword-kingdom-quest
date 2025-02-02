@@ -34,13 +34,17 @@ export const AuthForm = () => {
 
     try {
       if (isSignUp) {
-        await signUp({ email, password, firstName, lastName, country });
+        const { error } = await signUp({ email, password, firstName, lastName, country });
+        if (error) throw error;
+        
         toast({
           title: "Success!",
           description: "Please check your email to verify your account.",
         });
       } else {
-        await signIn(email, password);
+        const { error } = await signIn(email, password);
+        if (error) throw error;
+        
         navigate("/");
       }
     } catch (error: any) {

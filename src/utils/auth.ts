@@ -9,7 +9,7 @@ interface SignUpData {
 }
 
 export const signUp = async ({ email, password, firstName, lastName, country }: SignUpData) => {
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -20,13 +20,25 @@ export const signUp = async ({ email, password, firstName, lastName, country }: 
       },
     },
   });
-  if (error) throw error;
+  
+  return { data, error };
 };
 
 export const signIn = async (email: string, password: string) => {
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
-  if (error) throw error;
+  
+  return { data, error };
+};
+
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  return { error };
+};
+
+export const getSession = async () => {
+  const { data: { session }, error } = await supabase.auth.getSession();
+  return { session, error };
 };
