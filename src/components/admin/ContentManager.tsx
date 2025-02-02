@@ -26,7 +26,7 @@ export const ContentManager = () => {
       }
       
       console.log("Fetched contents:", data);
-      return data;
+      return data || []; // Ensure we always return an array, even if empty
     },
   });
 
@@ -83,7 +83,13 @@ export const ContentManager = () => {
         </Alert>
       )}
 
-      {contents && !isLoading && !error && (
+      {!contents?.length && !isLoading && !error && (
+        <Alert>
+          <AlertDescription>No content found. Create some content to get started.</AlertDescription>
+        </Alert>
+      )}
+
+      {contents && contents.length > 0 && !isLoading && !error && (
         <ContentList
           contents={contents}
           onContentsChange={refetch}
