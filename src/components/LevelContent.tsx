@@ -23,6 +23,7 @@ export const LevelContent = ({ level, onBack, quizId }: LevelContentProps) => {
   const [isQuizComplete, setIsQuizComplete] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [quizTimeLimit, setQuizTimeLimit] = useState<number>(30);
+  const [showingAnswer, setShowingAnswer] = useState(false);
 
   useEffect(() => {
     fetchQuestions();
@@ -127,11 +128,13 @@ export const LevelContent = ({ level, onBack, quizId }: LevelContentProps) => {
   const handleNextQuestion = async () => {
     if (!selectedAnswer) return;
 
-    const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = selectedAnswer === currentQuestion.correct_answer;
-
-    if (isCorrect) {
-      setScore(score + 1);
+    if (!showingAnswer) {
+      setShowingAnswer(true);
+      const isCorrect = selectedAnswer === questions[currentQuestionIndex].correct_answer;
+      if (isCorrect) {
+        setScore(score + 1);
+      }
+      return;
     }
 
     if (currentQuestionIndex === questions.length - 1) {
@@ -139,6 +142,7 @@ export const LevelContent = ({ level, onBack, quizId }: LevelContentProps) => {
     } else {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedAnswer(null);
+      setShowingAnswer(false);
     }
   };
 
@@ -191,6 +195,7 @@ export const LevelContent = ({ level, onBack, quizId }: LevelContentProps) => {
             onNext={handleNextQuestion}
             onBack={onBack}
             isLastQuestion={currentQuestionIndex === questions.length - 1}
+            showingAnswer={showingAnswer}
           />
         )}
       </CardContent>
