@@ -45,7 +45,7 @@ export const Leaderboard = () => {
   useEffect(() => {
     console.log("Setting up real-time subscription...");
     const channel = supabase
-      .channel('points-updates')
+      .channel('points_changes')
       .on(
         'postgres_changes',
         {

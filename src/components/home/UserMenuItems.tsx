@@ -27,7 +27,7 @@ export const UserMenuItems = ({ userPoints: initialPoints, isAdmin, onCloseMenu 
       console.log("Setting up points subscription for user:", user.id);
       
       const channel = supabase
-        .channel('points-updates')
+        .channel('user_points_updates')
         .on(
           'postgres_changes',
           {
