@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LevelQuizzes } from "@/components/levels/LevelQuizzes";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { HomeLink } from "@/components/HomeLink";
 
 const Levels = () => {
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
@@ -97,6 +98,7 @@ const Levels = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 min-h-screen bg-gradient-to-b from-background to-muted">
+      <HomeLink />
       {selectedQuizId ? (
         <LevelContent
           level={selectedLevel!}

@@ -6,6 +6,7 @@ import { LevelContent } from '@/components/LevelContent';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { HomeLink } from '@/components/HomeLink';
 
 const Quiz = () => {
   const { id } = useParams();
@@ -43,29 +44,36 @@ const Quiz = () => {
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-2xl mx-auto mt-8">
-        <CardContent className="p-6">
-          <p className="text-center">Loading quiz...</p>
-        </CardContent>
-      </Card>
+      <div className="container mx-auto px-4 py-8">
+        <HomeLink />
+        <Card className="w-full max-w-2xl mx-auto mt-8">
+          <CardContent className="p-6">
+            <p className="text-center">Loading quiz...</p>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   if (!quiz) {
     return (
-      <Card className="w-full max-w-2xl mx-auto mt-8">
-        <CardContent className="p-6">
-          <p className="text-center">Quiz not found</p>
-          <Button onClick={handleBack} className="mt-4 w-full">
-            Go Back
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="container mx-auto px-4 py-8">
+        <HomeLink />
+        <Card className="w-full max-w-2xl mx-auto mt-8">
+          <CardContent className="p-6">
+            <p className="text-center">Quiz not found</p>
+            <Button onClick={handleBack} className="mt-4 w-full">
+              Go Back
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <HomeLink />
       <LevelContent
         level={quiz.questions[0]?.level || 1}
         onBack={handleBack}
