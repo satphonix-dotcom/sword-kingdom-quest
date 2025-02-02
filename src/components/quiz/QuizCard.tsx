@@ -1,7 +1,9 @@
 import { Quiz } from "@/types/quiz";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Edit2, Trash2, Trophy } from "lucide-react";
+import { Edit2, Trash2, Trophy, CheckCircle2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuizCardProps {
   quiz: Quiz;
@@ -12,6 +14,23 @@ interface QuizCardProps {
 }
 
 export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: QuizCardProps) => {
+  const { data: quizResponse } = useQuery({
+    queryKey: ['quizResponse', quiz.id],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data } = await supabase
+        .from('quiz_responses')
+        .select('*')
+        .eq('quiz_id', quiz.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      return data;
+    },
+  });
+
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     onEdit?.(quiz);
@@ -22,6 +41,8 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
     onDelete?.(quiz);
   };
 
+  const isCompleted = !!quizResponse;
+
   return (
     <Card 
       className="hover:bg-slate-800/90 hover:shadow-md transition-all border border-slate-200 cursor-pointer"
@@ -30,7 +51,12 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <h3 className="text-xl font-semibold text-white">{quiz.title}</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-semibold text-white">{quiz.title}</h3>
+              {isCompleted && (
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
+              )}
+            </div>
             {quiz.description && (
               <p className="text-slate-300 mt-1">{quiz.description}</p>
             )}
@@ -42,6 +68,11 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
                 <Trophy className="h-4 w-4" />
                 <span className="text-sm">{quiz.points} points</span>
               </div>
+              {isCompleted && (
+                <span className="text-sm text-green-500">
+                  Completed
+                </span>
+              )}
             </div>
           </div>
           {isAdmin && (
