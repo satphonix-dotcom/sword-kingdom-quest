@@ -22,6 +22,8 @@ export interface Quiz {
   time_limit: number | null;
   points: number;
   questions?: Question[];
+  created_by: string;
+  updated_at: string;
 }
 
 export interface Level {
