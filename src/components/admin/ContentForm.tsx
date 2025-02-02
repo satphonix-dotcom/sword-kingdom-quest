@@ -10,6 +10,7 @@ import { ContentFormActions } from "./content/ContentFormActions";
 import { Database } from "@/integrations/supabase/types";
 
 type PageIdentifier = Database["public"]["Enums"]["page_identifier"];
+type PageContent = Database["public"]["Tables"]["page_contents"]["Insert"];
 
 const contentFormSchema = z.object({
   page_id: z.enum([
@@ -72,18 +73,19 @@ export const ContentForm = ({
       } catch (e) {
         toast({
           title: "Error",
-          description: "Invalid content format",
+          description: "Invalid JSON content format",
           variant: "destructive",
         });
+        setIsSubmitting(false);
         return;
       }
 
-      const contentData = {
+      const contentData: PageContent = {
         page_id: values.page_id,
         section_id: values.section_id,
         content: parsedContent,
         created_by: userId,
-      } as const;
+      };
 
       if (editContent) {
         const { error } = await supabase
