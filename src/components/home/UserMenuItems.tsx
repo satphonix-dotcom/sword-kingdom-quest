@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UserCircle, Trophy } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 interface UserMenuItemsProps {
   userPoints: number;
@@ -8,7 +9,40 @@ interface UserMenuItemsProps {
   onCloseMenu?: () => void;
 }
 
-export const UserMenuItems = ({ userPoints, isAdmin, onCloseMenu }: UserMenuItemsProps) => {
+export const UserMenuItems = ({ userPoints: initialPoints, isAdmin, onCloseMenu }: UserMenuItemsProps) => {
+  const [points, setPoints] = useState(initialPoints);
+
+  useEffect(() => {
+    setPoints(initialPoints);
+  }, [initialPoints]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('points-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${supabase.auth.getUser().then(({ data }) => data.user?.id)}`
+        },
+        (payload) => {
+          console.log("Points update received:", payload);
+          if (payload.new && 'points' in payload.new) {
+            setPoints(payload.new.points);
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log("Points subscription status:", status);
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return (
     <>
       <Link 
@@ -21,7 +55,7 @@ export const UserMenuItems = ({ userPoints, isAdmin, onCloseMenu }: UserMenuItem
       </Link>
       <div className="flex items-center gap-2 text-gameGold">
         <Trophy className="w-5 h-5" />
-        <span>{userPoints} points</span>
+        <span>{points} points</span>
       </div>
       {isAdmin && (
         <Link 
