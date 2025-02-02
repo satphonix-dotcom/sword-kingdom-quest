@@ -4,6 +4,7 @@ import { QuizContent } from "./quiz/QuizContent";
 import { useQuizResponse } from "@/hooks/use-quiz-response";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Quiz } from "@/types/quiz";
 
 interface LevelContentProps {
   level: number;
@@ -26,7 +27,19 @@ export const LevelContent = ({ level, onBack, quizId }: LevelContentProps) => {
     enabled: !!quizId,
   });
 
-  const { isPerfectScore } = useQuizResponse(quiz || { id: '' });
+  // Create a default quiz object that matches the Quiz type
+  const defaultQuiz: Quiz = {
+    id: '',
+    title: '',
+    description: null,
+    created_at: new Date().toISOString(),
+    time_limit: null,
+    points: 0,
+    created_by: '',
+    updated_at: new Date().toISOString()
+  };
+
+  const { isPerfectScore } = useQuizResponse(quiz || defaultQuiz);
 
   const {
     questions,
