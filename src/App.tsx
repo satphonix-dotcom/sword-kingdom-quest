@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
@@ -17,23 +17,21 @@ import Admin from '@/pages/Admin';
 function App() {
   return (
     <>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/levels" element={<Levels />} />
-          <Route path="/quiz/:id" element={<Quiz />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/leaderboard" element={<LeaderboardPage />} />
-          <Route path="/faq" element={<FAQ />} />
-          <Route path="/learn-more" element={<LearnMore />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/study-guide" element={<StudyGuide />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-      </Router>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/levels" element={<Levels />} />
+        <Route path="/quiz/:id" element={<Quiz />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/learn-more" element={<LearnMore />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/study-guide" element={<StudyGuide />} />
+        <Route path="/admin" element={<Admin />} />
+      </Routes>
       <Toaster />
     </>
   );
