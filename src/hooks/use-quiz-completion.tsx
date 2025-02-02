@@ -85,7 +85,19 @@ export const useQuizCompletion = () => {
       }
 
       if (pointsToAward > 0) {
-        await awardPoints(user.id, pointsToAward);
+        const { error: pointsError } = await awardPoints(user.id, pointsToAward);
+        if (pointsError) {
+          toast({
+            title: "Error",
+            description: "Failed to award points",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Points Awarded!",
+            description: `You earned ${pointsToAward} points!`,
+          });
+        }
       } else if (scorePercentage < 100) {
         console.log("Score below 100%, no points awarded");
         toast({
@@ -97,6 +109,11 @@ export const useQuizCompletion = () => {
       return finalScore;
     } catch (error) {
       console.error("Error in handleQuizComplete:", error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
       return null;
     }
   };
