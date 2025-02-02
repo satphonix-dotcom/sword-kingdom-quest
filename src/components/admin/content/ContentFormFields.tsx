@@ -6,7 +6,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -15,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
+import { WysiwygEditor } from "./WysiwygEditor";
 
 interface ContentFormFieldsProps {
   form: UseFormReturn<any>;
@@ -76,12 +76,11 @@ export const ContentFormFields = ({ form }: ContentFormFieldsProps) => {
         name="content"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Content (JSON)</FormLabel>
+            <FormLabel>Content</FormLabel>
             <FormControl>
-              <Textarea
-                placeholder="Enter content in JSON format"
-                className="h-32 font-mono"
-                {...field}
+              <WysiwygEditor 
+                value={field.value} 
+                onChange={field.onChange}
               />
             </FormControl>
             <FormMessage />
