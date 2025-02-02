@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Question } from "@/types/quiz";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { validateCsvRow } from "@/utils/csvValidator";
+import { CsvErrorDisplay } from "./CsvErrorDisplay";
+import { CsvFormatGuide } from "./CsvFormatGuide";
 
 interface CsvUploadProps {
   onQuestionsImported: (questions: Question[]) => void;
@@ -20,33 +22,6 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
     }
-  };
-
-  const validateCsvRow = (row: string[], rowIndex: number): string | null => {
-    // First, clean and validate each cell
-    const cleanedRow = row.map(cell => cell.trim());
-    
-    // Check if row has exactly 6 columns (question, correct answer, 4 options)
-    if (cleanedRow.length !== 6) {
-      return `Row ${rowIndex + 1} is invalid. Expected 6 columns but found ${cleanedRow.length}. Each row must contain: question, correct answer, and 4 options.`;
-    }
-
-    // Check for empty cells
-    const emptyIndex = cleanedRow.findIndex(cell => !cell);
-    if (emptyIndex !== -1) {
-      const fieldName = emptyIndex === 0 ? "Question" : 
-                       emptyIndex === 1 ? "Correct answer" : 
-                       `Option ${emptyIndex - 1}`;
-      return `Row ${rowIndex + 1}: ${fieldName} cannot be empty`;
-    }
-
-    // Validate that the correct answer appears in the options
-    const [, correctAnswer, ...options] = cleanedRow;
-    if (!options.includes(correctAnswer)) {
-      return `Row ${rowIndex + 1}: Correct answer "${correctAnswer}" must be one of the options`;
-    }
-
-    return null;
   };
 
   const handleUpload = async () => {
@@ -74,7 +49,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
           return;
         }
         
-        // Skip header row if it exists (case insensitive check for "question" in first cell)
+        // Skip header row if it exists
         const dataRows = rows[0][0].toLowerCase().includes('question') ? rows.slice(1) : rows;
         
         if (dataRows.length === 0) {
@@ -146,28 +121,8 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
         </Button>
       </div>
       
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription className="whitespace-pre-line">
-            {error}
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      <div className="space-y-2 border border-gray-700 rounded-lg p-4 bg-gray-900/50">
-        <p className="text-sm text-gray-400 font-medium">CSV Format Requirements:</p>
-        <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
-          <li>File must be in CSV format (.csv)</li>
-          <li>Each row must contain exactly 6 columns in this order:</li>
-          <li className="ml-6">1. Question text (maps to question column)</li>
-          <li className="ml-6">2. Correct answer (maps to correct_answer column)</li>
-          <li className="ml-6">3-6. Four options (stored as JSON in options column)</li>
-          <li>The correct answer must be one of the options</li>
-          <li>No empty fields are allowed</li>
-          <li>Headers are optional (will be skipped if present)</li>
-          <li>Example row: What is 2+2?,4,2,3,4,5</li>
-        </ul>
-      </div>
+      <CsvErrorDisplay error={error} />
+      <CsvFormatGuide />
     </div>
   );
 };
