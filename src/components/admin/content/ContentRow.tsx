@@ -1,6 +1,7 @@
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ContentListActions } from "./ContentListActions";
+import { Database } from "@/integrations/supabase/types";
 
 interface ContentRowProps {
   content: any;
@@ -28,8 +29,8 @@ export const ContentRow = ({
     }
   };
 
-  const getPageTitle = (pageId: string) => {
-    const titles: { [key: string]: string } = {
+  const getPageTitle = (pageId: Database["public"]["Enums"]["page_identifier"]) => {
+    const titles: Record<Database["public"]["Enums"]["page_identifier"], string> = {
       home: "Home Page",
       about: "About Us",
       privacy: "Privacy Policy",
@@ -40,7 +41,7 @@ export const ContentRow = ({
       levels: "Levels",
       quiz: "Quiz",
       leaderboard: "Leaderboard",
-      profile: "Profile",
+      profile: "Profile"
     };
     return titles[pageId] || pageId;
   };
