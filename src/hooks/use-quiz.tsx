@@ -42,12 +42,17 @@ export const useQuiz = (level: number, quizId?: string) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: responses } = await supabase
+      const { data: responses, error } = await supabase
         .from("quiz_responses")
         .select("*")
         .eq("quiz_id", quizId)
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error checking previous attempt:", error);
+        return;
+      }
 
       if (responses) {
         setHasAttempted(true);
