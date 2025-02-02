@@ -71,15 +71,50 @@ export const useQuizCompletion = () => {
         pointsToAward = questions[0]?.level * 5;
       }
 
-      const { error: responseError } = await supabase.from("quiz_responses").insert({
-        quiz_id: questions[0]?.quiz_id,
-        user_id: user.id,
-        answers: questions.map((q, i) => ({
-          question_id: q.id,
-          selected_answer: i === currentQuestionIndex ? selectedAnswer : null
-        })),
-        score: finalScore
-      });
+      // Check if a response already exists
+      const { data: existingResponse } = await supabase
+        .from("quiz_responses")
+        .select("id, score")
+        .eq("quiz_id", questions[0]?.quiz_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      let responseError;
+
+      if (existingResponse) {
+        // Update existing response if new score is higher
+        if (finalScore > existingResponse.score) {
+          const { error } = await supabase
+            .from("quiz_responses")
+            .update({
+              answers: questions.map((q, i) => ({
+                question_id: q.id,
+                selected_answer: i === currentQuestionIndex ? selectedAnswer : null
+              })),
+              score: finalScore,
+              completed_at: new Date().toISOString()
+            })
+            .eq("id", existingResponse.id);
+          responseError = error;
+        } else {
+          // If existing score is higher or equal, just return the existing score
+          return existingResponse.score;
+        }
+      } else {
+        // Insert new response
+        const { error } = await supabase
+          .from("quiz_responses")
+          .insert({
+            quiz_id: questions[0]?.quiz_id,
+            user_id: user.id,
+            answers: questions.map((q, i) => ({
+              question_id: q.id,
+              selected_answer: i === currentQuestionIndex ? selectedAnswer : null
+            })),
+            score: finalScore
+          });
+        responseError = error;
+      }
 
       if (responseError) {
         console.error("Error saving quiz response:", responseError);
