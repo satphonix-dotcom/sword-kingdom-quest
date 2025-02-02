@@ -126,7 +126,7 @@ const Support = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <Mail className="text-gameGold w-5 h-5" />
-                    <span className="text-gray-300">support@swordkings.com</span>
+                    <span className="text-gray-300">support@gameofswordkings.com</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone className="text-gameGold w-5 h-5" />
