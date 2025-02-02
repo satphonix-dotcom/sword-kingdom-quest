@@ -27,15 +27,30 @@ export const useQuizCompletion = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('No user found for quiz response');
+        toast({
+          title: "Error",
+          description: "User not found",
+          variant: "destructive",
+        });
         return;
       }
 
       // Get the quiz details to access the points value
-      const { data: quiz } = await supabase
+      const { data: quiz, error: quizError } = await supabase
         .from("quizzes")
         .select("points")
         .eq("id", questions[0]?.quiz_id)
         .single();
+
+      if (quizError) {
+        console.error('Error fetching quiz points:', quizError);
+        toast({
+          title: "Error",
+          description: "Failed to fetch quiz information",
+          variant: "destructive",
+        });
+        return;
+      }
 
       const { scorePercentage, pointsToAward } = calculatePointsToAward(
         finalScore,
@@ -85,8 +100,10 @@ export const useQuizCompletion = () => {
       }
 
       if (pointsToAward > 0) {
+        console.log(`Attempting to award ${pointsToAward} points to user ${user.id}`);
         const { error: pointsError } = await awardPoints(user.id, pointsToAward);
         if (pointsError) {
+          console.error("Error awarding points:", pointsError);
           toast({
             title: "Error",
             description: "Failed to award points",
