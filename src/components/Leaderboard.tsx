@@ -28,8 +28,8 @@ export const Leaderboard = () => {
         throw error;
       }
 
-      console.log("Received leaderboard data:", data);
-      return data.map((entry, index) => ({
+      console.log("Received raw leaderboard data:", data);
+      const transformedData = data.map((entry, index) => ({
         rank: index + 1,
         name: entry.first_name && entry.last_name
           ? `${entry.first_name} ${entry.last_name}`
@@ -37,6 +37,8 @@ export const Leaderboard = () => {
         score: entry.points || 0,
         country: entry.country || "Unknown",
       }));
+      console.log("Transformed leaderboard data:", transformedData);
+      return transformedData;
     },
   });
 
@@ -53,7 +55,8 @@ export const Leaderboard = () => {
           table: 'profiles'
         },
         (payload) => {
-          console.log("Received real-time update:", payload);
+          console.log("Received real-time update payload:", payload);
+          console.log("Current leaderboard data before update:", leaderboardData);
           refetch();
           toast({
             title: "Leaderboard Updated",
@@ -69,7 +72,7 @@ export const Leaderboard = () => {
       console.log("Cleaning up real-time subscription...");
       supabase.removeChannel(channel);
     };
-  }, [refetch, toast]);
+  }, [refetch, toast, leaderboardData]);
 
   if (isLoading) {
     return <div>Loading...</div>;
