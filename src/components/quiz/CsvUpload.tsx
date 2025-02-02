@@ -23,17 +23,21 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
   };
 
   const validateCsvRow = (row: string[], rowIndex: number): string | null => {
-    // Remove any empty strings or whitespace-only strings
-    const cleanedRow = row.map(cell => cell.trim()).filter(cell => cell.length > 0);
-
+    // First, clean and validate each cell
+    const cleanedRow = row.map(cell => cell.trim());
+    
     // Check if row has exactly 6 columns (question, correct answer, 4 options)
     if (cleanedRow.length !== 6) {
-      return `Row ${rowIndex + 1} must contain exactly 6 columns: question, correct answer, and 4 options. Found ${cleanedRow.length} columns.`;
+      return `Row ${rowIndex + 1} is invalid. Expected 6 columns but found ${cleanedRow.length}. Each row must contain: question, correct answer, and 4 options.`;
     }
 
-    // Check if any field is empty after trimming
-    if (cleanedRow.some(field => !field)) {
-      return `Row ${rowIndex + 1} contains empty fields. All fields must have content.`;
+    // Check for empty cells
+    const emptyIndex = cleanedRow.findIndex(cell => !cell);
+    if (emptyIndex !== -1) {
+      const fieldName = emptyIndex === 0 ? "Question" : 
+                       emptyIndex === 1 ? "Correct answer" : 
+                       `Option ${emptyIndex - 1}`;
+      return `Row ${rowIndex + 1}: ${fieldName} cannot be empty`;
     }
 
     return null;
@@ -54,15 +58,21 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
     reader.onload = async (e) => {
       try {
         const text = e.target?.result as string;
+        // Split by newline and remove empty rows
         const rows = text.split('\n')
-          .map(row => row.split(',').map(cell => cell.trim()))
-          .filter(row => row.length > 1); // Filter out empty rows
+          .map(row => row.split(','))
+          .filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
+
+        if (rows.length === 0) {
+          setError("The CSV file appears to be empty. Please check the file content.");
+          return;
+        }
         
-        // Skip header row if it exists
+        // Skip header row if it exists (case insensitive check for "question" in first cell)
         const dataRows = rows[0][0].toLowerCase().includes('question') ? rows.slice(1) : rows;
         
         if (dataRows.length === 0) {
-          setError("No valid data rows found in the CSV file.");
+          setError("No valid data rows found in the CSV file. Please check the format.");
           return;
         }
 
@@ -78,6 +88,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
           return;
         }
 
+        // Process valid rows into questions
         const questions: Question[] = dataRows.map(row => {
           const [question, correctAnswer, ...options] = row.map(cell => cell.trim());
           return {
@@ -93,18 +104,18 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
         onQuestionsImported(questions);
         toast({
           title: "Success",
-          description: `${questions.length} questions parsed successfully. Click "Create Quiz" to save them.`,
+          description: `${questions.length} questions parsed successfully`,
         });
 
-        // Clear the file input and error
+        // Reset the form
         setFile(null);
         setError(null);
         const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
 
       } catch (error: any) {
-        console.error('CSV upload error:', error);
-        setError(error.message || "Failed to parse CSV file. Please check the format and try again.");
+        console.error('CSV parsing error:', error);
+        setError("Failed to parse the CSV file. Please ensure it follows the required format.");
       }
     };
 
@@ -137,9 +148,10 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
         </Alert>
       )}
       
-      <div className="space-y-2">
+      <div className="space-y-2 border border-gray-700 rounded-lg p-4 bg-gray-900/50">
         <p className="text-sm text-gray-400 font-medium">CSV Format Requirements:</p>
         <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
+          <li>File must be in CSV format (.csv)</li>
           <li>Each row must contain exactly 6 columns in this order:</li>
           <li className="ml-6">1. Question text</li>
           <li className="ml-6">2. Correct answer</li>
@@ -149,7 +161,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
           <li className="ml-6">6. Option 4</li>
           <li>No empty fields are allowed</li>
           <li>Headers are optional (will be skipped if present)</li>
-          <li>Example: What is 2+2?,4,2,3,4,5</li>
+          <li>Example row: What is 2+2?,4,2,3,4,5</li>
         </ul>
       </div>
     </div>
