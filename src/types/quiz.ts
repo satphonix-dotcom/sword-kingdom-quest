@@ -20,4 +20,5 @@ export interface Quiz {
   description: string | null;
   created_at: string;
   time_limit: number | null;
+  questions?: Question[];
 }
