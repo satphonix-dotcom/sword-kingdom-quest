@@ -4,6 +4,7 @@ import { QuizTimer } from "./QuizTimer";
 import { QuizQuestion } from "./QuizQuestion";
 import { QuizComplete } from "./QuizComplete";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface QuizContentProps {
   level: number;
