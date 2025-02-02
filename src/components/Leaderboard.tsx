@@ -45,13 +45,14 @@ export const Leaderboard = () => {
   useEffect(() => {
     console.log("Setting up real-time subscription...");
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel('points-updates')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
-          table: 'profiles'
+          table: 'profiles',
+          filter: `points.gte.0`
         },
         (payload) => {
           console.log("Received real-time update payload:", payload);
@@ -63,7 +64,7 @@ export const Leaderboard = () => {
         }
       )
       .subscribe((status) => {
-        console.log("Subscription status:", status);
+        console.log("Points subscription status:", status);
       });
 
     return () => {

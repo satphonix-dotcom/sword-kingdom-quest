@@ -17,9 +17,6 @@ export const UserMenuItems = ({ userPoints: initialPoints, isAdmin, onCloseMenu 
   }, [initialPoints]);
 
   useEffect(() => {
-    let userId: string | undefined;
-    
-    // Get the user ID first
     const setupSubscription = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -27,8 +24,7 @@ export const UserMenuItems = ({ userPoints: initialPoints, isAdmin, onCloseMenu 
         return;
       }
       
-      userId = user.id;
-      console.log("Setting up points subscription for user:", userId);
+      console.log("Setting up points subscription for user:", user.id);
       
       const channel = supabase
         .channel('points-updates')
@@ -38,7 +34,7 @@ export const UserMenuItems = ({ userPoints: initialPoints, isAdmin, onCloseMenu 
             event: 'UPDATE',
             schema: 'public',
             table: 'profiles',
-            filter: `id=eq.${userId}`
+            filter: `id=eq.${user.id}`
           },
           (payload) => {
             console.log("Points update received:", payload);
@@ -53,7 +49,7 @@ export const UserMenuItems = ({ userPoints: initialPoints, isAdmin, onCloseMenu 
         });
 
       return () => {
-        console.log("Cleaning up points subscription for user:", userId);
+        console.log("Cleaning up points subscription");
         supabase.removeChannel(channel);
       };
     };
