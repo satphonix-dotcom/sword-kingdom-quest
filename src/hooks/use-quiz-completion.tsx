@@ -68,15 +68,9 @@ export const useQuizCompletion = () => {
         .eq("id", questions[0]?.quiz_id)
         .single();
 
-      // Calculate points based on score percentage and quiz points
+      // Only award points for 100% accuracy
       const scorePercentage = (finalScore / totalQuestions) * 100;
-      let pointsToAward = 0;
-
-      if (scorePercentage === 100) {
-        pointsToAward = quiz?.points || 0;
-      } else if (scorePercentage >= 70) {
-        pointsToAward = Math.floor((quiz?.points || 0) / 2);
-      }
+      let pointsToAward = scorePercentage === 100 ? (quiz?.points || 0) : 0;
 
       // Check if a response already exists
       const { data: existingResponse } = await supabase
