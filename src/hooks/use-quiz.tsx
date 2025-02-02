@@ -44,7 +44,7 @@ export const useQuiz = (level: number, quizId?: string) => {
 
       const { data: responses, error } = await supabase
         .from("quiz_responses")
-        .select("*")
+        .select("*, quizzes(points)")
         .eq("quiz_id", quizId)
         .eq("user_id", user.id)
         .maybeSingle();
@@ -56,9 +56,10 @@ export const useQuiz = (level: number, quizId?: string) => {
 
       if (responses) {
         setHasAttempted(true);
+        setScore(responses.score || 0);
         toast({
           title: "Quiz Already Completed",
-          description: "You have already completed this quiz. Your previous score will be kept.",
+          description: `You have already completed this quiz with a score of ${responses.score}/${questions.length}`,
           variant: "default",
         });
       }
@@ -123,18 +124,6 @@ export const useQuiz = (level: number, quizId?: string) => {
     }
   };
 
-  const handleAnswerSelect = (answer: string) => {
-    if (hasAttempted) {
-      toast({
-        title: "Quiz Already Completed",
-        description: "You cannot modify your answers as you've already completed this quiz.",
-        variant: "default",
-      });
-      return;
-    }
-    setSelectedAnswer(answer);
-  };
-
   const updateUserPoints = async (pointsToAdd: number) => {
     try {
       console.log("Starting points update process...");
@@ -163,7 +152,7 @@ export const useQuiz = (level: number, quizId?: string) => {
         console.log(`Successfully awarded ${pointsToAdd} points to user ${user.id}`);
         toast({
           title: "Points Awarded!",
-          description: `You earned ${pointsToAdd} points for your perfect score!`,
+          description: `You earned ${pointsToAdd} points!`,
         });
       }
     } catch (error) {
@@ -182,20 +171,25 @@ export const useQuiz = (level: number, quizId?: string) => {
       
       console.log(`Quiz completed. Final score: ${finalScore}/${totalQuestions}`);
       
-      // Check for perfect score (100%)
-      if (finalScore === totalQuestions) {
-        const pointsToAward = level * 10;
-        console.log(`Perfect score achieved! Awarding ${pointsToAward} points`);
-        await updateUserPoints(pointsToAward);
-      }
-
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('No user found for quiz response');
         return;
       }
 
-      const { error } = await supabase.from("quiz_responses").insert({
+      // Calculate points based on score percentage
+      const scorePercentage = (finalScore / totalQuestions) * 100;
+      let pointsToAward = 0;
+
+      if (scorePercentage === 100) {
+        // Perfect score bonus: level * 10
+        pointsToAward = level * 10;
+      } else if (scorePercentage >= 70) {
+        // Passing score: level * 5
+        pointsToAward = level * 5;
+      }
+
+      const { error: responseError } = await supabase.from("quiz_responses").insert({
         quiz_id: questions[0]?.quiz_id,
         user_id: user.id,
         answers: questions.map((q, i) => ({
@@ -205,25 +199,36 @@ export const useQuiz = (level: number, quizId?: string) => {
         score: finalScore
       });
 
-      if (error) {
-        if (error.code === '23505') {
-          toast({
-            title: "Quiz Already Completed",
-            description: "You have already completed this quiz. Your previous score will be kept.",
-            variant: "default",
-          });
-        } else {
-          console.error("Error saving quiz response:", error);
-          toast({
-            title: "Error",
-            description: "Failed to save quiz response",
-            variant: "destructive",
-          });
-        }
+      if (responseError) {
+        console.error("Error saving quiz response:", responseError);
+        toast({
+          title: "Error",
+          description: "Failed to save quiz response",
+          variant: "destructive",
+        });
+        return;
       }
+
+      if (pointsToAward > 0) {
+        await updateUserPoints(pointsToAward);
+      }
+
+      setScore(finalScore);
     } catch (error) {
       console.error("Error in handleQuizComplete:", error);
     }
+  };
+
+  const handleAnswerSelect = (answer: string) => {
+    if (hasAttempted) {
+      toast({
+        title: "Quiz Already Completed",
+        description: "You cannot modify your answers as you've already completed this quiz.",
+        variant: "default",
+      });
+      return;
+    }
+    setSelectedAnswer(answer);
   };
 
   const handleNextQuestion = async () => {
