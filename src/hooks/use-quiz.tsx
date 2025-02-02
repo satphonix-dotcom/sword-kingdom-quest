@@ -92,9 +92,12 @@ export const useQuiz = (level: number, quizId?: string) => {
   };
 
   const updateUserPoints = async (pointsToAdd: number) => {
-    console.log("Updating points:", pointsToAdd);
+    console.log("Attempting to update points:", pointsToAdd);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) {
+      console.error('No user found');
+      return;
+    }
 
     const { error } = await supabase.rpc('increment_user_points', {
       user_id: user.id,
@@ -109,9 +112,10 @@ export const useQuiz = (level: number, quizId?: string) => {
         variant: "destructive",
       });
     } else {
+      console.log(`Successfully awarded ${pointsToAdd} points`);
       toast({
-        title: "Success!",
-        description: `You earned ${pointsToAdd} points!`,
+        title: "Points Awarded!",
+        description: `You earned ${pointsToAdd} points for your perfect score!`,
       });
     }
   };
@@ -126,27 +130,37 @@ export const useQuiz = (level: number, quizId?: string) => {
     if (finalScore === totalQuestions) {
       // Award points based on the level (10 points per level for perfect score)
       const pointsToAward = level * 10;
-      console.log("Perfect score! Awarding points:", pointsToAward);
+      console.log("Perfect score achieved! Awarding points:", pointsToAward);
       await updateUserPoints(pointsToAward);
     }
 
-    const { error } = await supabase.from("quiz_responses").insert({
-      quiz_id: questions[0]?.quiz_id,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
-      answers: questions.map((q, i) => ({
-        question_id: q.id,
-        selected_answer: i === currentQuestionIndex ? selectedAnswer : null
-      })),
-      score: finalScore
-    });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No user found for quiz response');
+        return;
+      }
 
-    if (error) {
-      console.error("Error saving quiz response:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save quiz response",
-        variant: "destructive",
+      const { error } = await supabase.from("quiz_responses").insert({
+        quiz_id: questions[0]?.quiz_id,
+        user_id: user.id,
+        answers: questions.map((q, i) => ({
+          question_id: q.id,
+          selected_answer: i === currentQuestionIndex ? selectedAnswer : null
+        })),
+        score: finalScore
       });
+
+      if (error) {
+        console.error("Error saving quiz response:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save quiz response",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error in handleQuizComplete:", error);
     }
   };
 
