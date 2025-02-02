@@ -13,8 +13,10 @@ export const useQuiz = (level: number, quizId?: string) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [quizTimeLimit, setQuizTimeLimit] = useState<number>(30);
   const [showingAnswer, setShowingAnswer] = useState(false);
+  const [hasAttempted, setHasAttempted] = useState(false);
 
   useEffect(() => {
+    checkPreviousAttempt();
     fetchQuestions();
   }, [level, quizId]);
 
@@ -32,6 +34,33 @@ export const useQuiz = (level: number, quizId?: string) => {
 
     return () => clearInterval(timer);
   }, [timeLeft, isQuizComplete]);
+
+  const checkPreviousAttempt = async () => {
+    if (!quizId) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: responses } = await supabase
+        .from("quiz_responses")
+        .select("*")
+        .eq("quiz_id", quizId)
+        .eq("user_id", user.id)
+        .single();
+
+      if (responses) {
+        setHasAttempted(true);
+        toast({
+          title: "Quiz Already Completed",
+          description: "You have already completed this quiz. Your previous score will be kept.",
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Error checking previous attempt:", error);
+    }
+  };
 
   const fetchQuestions = async () => {
     try {
@@ -90,6 +119,14 @@ export const useQuiz = (level: number, quizId?: string) => {
   };
 
   const handleAnswerSelect = (answer: string) => {
+    if (hasAttempted) {
+      toast({
+        title: "Quiz Already Completed",
+        description: "You cannot modify your answers as you've already completed this quiz.",
+        variant: "default",
+      });
+      return;
+    }
     setSelectedAnswer(answer);
   };
 
@@ -130,6 +167,8 @@ export const useQuiz = (level: number, quizId?: string) => {
   };
 
   const handleQuizComplete = async () => {
+    if (hasAttempted) return;
+    
     try {
       setIsQuizComplete(true);
       
@@ -162,12 +201,20 @@ export const useQuiz = (level: number, quizId?: string) => {
       });
 
       if (error) {
-        console.error("Error saving quiz response:", error);
-        toast({
-          title: "Error",
-          description: "Failed to save quiz response",
-          variant: "destructive",
-        });
+        if (error.code === '23505') {
+          toast({
+            title: "Quiz Already Completed",
+            description: "You have already completed this quiz. Your previous score will be kept.",
+            variant: "default",
+          });
+        } else {
+          console.error("Error saving quiz response:", error);
+          toast({
+            title: "Error",
+            description: "Failed to save quiz response",
+            variant: "destructive",
+          });
+        }
       }
     } catch (error) {
       console.error("Error in handleQuizComplete:", error);
@@ -175,7 +222,7 @@ export const useQuiz = (level: number, quizId?: string) => {
   };
 
   const handleNextQuestion = async () => {
-    if (!selectedAnswer) return;
+    if (!selectedAnswer || hasAttempted) return;
 
     if (!showingAnswer) {
       setShowingAnswer(true);
