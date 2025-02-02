@@ -5,6 +5,7 @@ import { Edit2, Trash2 } from "lucide-react";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 interface QuizListProps {
   quizzes: Quiz[] | null;
@@ -15,6 +16,22 @@ interface QuizListProps {
 
 export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit }: QuizListProps) => {
   const { toast } = useToast();
+
+  const { data: isAdmin } = useQuery({
+    queryKey: ["isAdmin"],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+
+      return profile?.is_admin || false;
+    },
+  });
 
   const handleDelete = async (quiz: Quiz) => {
     try {
@@ -70,24 +87,26 @@ export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit }: QuizLi
                   Time limit: {quiz.time_limit || 'No'} minutes
                 </p>
               </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => onEdit?.(quiz)}
-                  className="h-8 w-8"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleDelete(quiz)}
-                  className="h-8 w-8 text-red-500 hover:text-red-600"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => onEdit?.(quiz)}
+                    className="h-8 w-8"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleDelete(quiz)}
+                    className="h-8 w-8 text-red-500 hover:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
