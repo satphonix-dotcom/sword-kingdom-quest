@@ -45,6 +45,11 @@ export const ContentFormFields = ({ form }: ContentFormFieldsProps) => {
                 <SelectItem value="faq">FAQ</SelectItem>
                 <SelectItem value="study_guide">Study Guide</SelectItem>
                 <SelectItem value="learn_more">Learn More</SelectItem>
+                <SelectItem value="support">Support</SelectItem>
+                <SelectItem value="levels">Levels</SelectItem>
+                <SelectItem value="quiz">Quiz</SelectItem>
+                <SelectItem value="leaderboard">Leaderboard</SelectItem>
+                <SelectItem value="profile">Profile</SelectItem>
               </SelectContent>
             </Select>
             <FormMessage />
@@ -75,7 +80,7 @@ export const ContentFormFields = ({ form }: ContentFormFieldsProps) => {
             <FormControl>
               <Textarea
                 placeholder="Enter content in JSON format"
-                className="h-32"
+                className="h-32 font-mono"
                 {...field}
               />
             </FormControl>
