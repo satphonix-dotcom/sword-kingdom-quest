@@ -24,6 +24,8 @@ export const useQuizPoints = () => {
         quizPoints
       );
 
+      console.log(`Score percentage: ${scorePercentage}%, Points to award: ${pointsToAward}`);
+
       if (pointsToAward > 0) {
         console.log(`Attempting to award ${pointsToAward} points to user ${userId}`);
         
@@ -44,8 +46,8 @@ export const useQuizPoints = () => {
           description: `Congratulations! You earned ${pointsToAward} points! New total: ${newTotal}`,
         });
         return true;
-      } else if (scorePercentage < 100) {
-        console.log("Score below 100%, no points awarded");
+      } else {
+        console.log(`No points awarded. Score: ${scorePercentage}%, Required: 100%`);
         toast({
           title: "Keep practicing!",
           description: "You need a perfect score to earn points. Try again!",

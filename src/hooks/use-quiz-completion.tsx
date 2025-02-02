@@ -33,10 +33,10 @@ export const useQuizCompletion = () => {
         return null;
       }
 
-      // Get the quiz details to access the points value
+      // Get the quiz details with points value
       const { data: quiz, error: quizError } = await supabase
         .from("quizzes")
-        .select("points")
+        .select("points, title")
         .eq("id", questions[0]?.quiz_id)
         .single();
 
@@ -49,6 +49,9 @@ export const useQuizCompletion = () => {
         });
         return null;
       }
+
+      console.log('Quiz points value:', quiz?.points);
+      console.log('Quiz title:', quiz?.title);
 
       // Handle quiz response
       const responseScore = await handleQuizResponse(
@@ -64,12 +67,15 @@ export const useQuizCompletion = () => {
         return null;
       }
 
-      // Handle points award
+      // Handle points award with the actual quiz points value
+      const quizPoints = quiz?.points || 0;
+      console.log(`Attempting to award points for quiz "${quiz?.title}". Points possible: ${quizPoints}`);
+      
       await handlePointsAward(
         user.id,
         finalScore,
         totalQuestions,
-        quiz?.points || 0
+        quizPoints
       );
 
       return finalScore;
