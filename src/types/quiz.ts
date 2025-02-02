@@ -22,3 +22,15 @@ export interface Quiz {
   time_limit: number | null;
   questions?: Question[];
 }
+
+export interface Level {
+  id: string;
+  order_number: number;
+  title: string;
+  description: string | null;
+  points: number;
+  is_locked: boolean;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+}
