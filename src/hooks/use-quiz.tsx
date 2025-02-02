@@ -91,9 +91,43 @@ export const useQuiz = (level: number, quizId?: string) => {
     setSelectedAnswer(answer);
   };
 
+  const updateUserPoints = async (pointsToAdd: number) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { error } = await supabase.rpc('increment_user_points', {
+      user_id: user.id,
+      points_to_add: pointsToAdd
+    });
+
+    if (error) {
+      console.error('Error updating points:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update points",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success!",
+        description: `You earned ${pointsToAdd} points!`,
+      });
+    }
+  };
+
   const handleQuizComplete = async () => {
     setIsQuizComplete(true);
     
+    const finalScore = score + (selectedAnswer === questions[currentQuestionIndex]?.correct_answer ? 1 : 0);
+    const totalQuestions = questions.length;
+    
+    // Check for perfect score (100%)
+    if (finalScore === totalQuestions) {
+      // Award points based on the level
+      const pointsToAward = level * 10; // 10 points per level for perfect score
+      await updateUserPoints(pointsToAward);
+    }
+
     const { error } = await supabase.from("quiz_responses").insert({
       quiz_id: questions[0]?.quiz_id,
       user_id: (await supabase.auth.getUser()).data.user?.id,
@@ -101,7 +135,7 @@ export const useQuiz = (level: number, quizId?: string) => {
         question_id: q.id,
         selected_answer: i === currentQuestionIndex ? selectedAnswer : null
       })),
-      score: score + (selectedAnswer === questions[currentQuestionIndex]?.correct_answer ? 1 : 0)
+      score: finalScore
     });
 
     if (error) {
