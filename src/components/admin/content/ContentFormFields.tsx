@@ -15,10 +15,27 @@ import {
 } from "@/components/ui/select";
 import { UseFormReturn } from "react-hook-form";
 import { WysiwygEditor } from "./WysiwygEditor";
+import { Database } from "@/integrations/supabase/types";
+
+type PageIdentifier = Database["public"]["Enums"]["page_identifier"];
 
 interface ContentFormFieldsProps {
   form: UseFormReturn<any>;
 }
+
+const PAGE_OPTIONS: { value: PageIdentifier; label: string }[] = [
+  { value: "home", label: "Home" },
+  { value: "about", label: "About" },
+  { value: "privacy", label: "Privacy" },
+  { value: "faq", label: "FAQ" },
+  { value: "study_guide", label: "Study Guide" },
+  { value: "learn_more", label: "Learn More" },
+  { value: "support", label: "Support" },
+  { value: "levels", label: "Levels" },
+  { value: "quiz", label: "Quiz" },
+  { value: "leaderboard", label: "Leaderboard" },
+  { value: "profile", label: "Profile" },
+];
 
 export const ContentFormFields = ({ form }: ContentFormFieldsProps) => {
   return (
@@ -39,17 +56,11 @@ export const ContentFormFields = ({ form }: ContentFormFieldsProps) => {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="home">Home</SelectItem>
-                <SelectItem value="about">About</SelectItem>
-                <SelectItem value="privacy">Privacy</SelectItem>
-                <SelectItem value="faq">FAQ</SelectItem>
-                <SelectItem value="study_guide">Study Guide</SelectItem>
-                <SelectItem value="learn_more">Learn More</SelectItem>
-                <SelectItem value="support">Support</SelectItem>
-                <SelectItem value="levels">Levels</SelectItem>
-                <SelectItem value="quiz">Quiz</SelectItem>
-                <SelectItem value="leaderboard">Leaderboard</SelectItem>
-                <SelectItem value="profile">Profile</SelectItem>
+                {PAGE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />
