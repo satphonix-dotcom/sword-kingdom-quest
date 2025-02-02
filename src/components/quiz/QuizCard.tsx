@@ -1,7 +1,9 @@
 import { Quiz } from "@/types/quiz";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Edit2, Trash2, Trophy, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
+import { useQuizResponse } from "@/hooks/use-quiz-response";
+import { QuizMetadataDisplay } from "./QuizMetadataDisplay";
+import { QuizAdminActions } from "./QuizAdminActions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,43 +16,23 @@ interface QuizCardProps {
 }
 
 export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: QuizCardProps) => {
-  const { data: quizResponse } = useQuery({
-    queryKey: ['quizResponse', quiz.id],
+  const { isCompleted, isPerfectScore } = useQuizResponse(quiz);
+
+  const { data: isUserAdmin } = useQuery({
+    queryKey: ["isAdmin"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
+      if (!user) return false;
 
-      const { data: response } = await supabase
-        .from('quiz_responses')
-        .select('*, questions:quizzes(questions(*))')
-        .eq('quiz_id', quiz.id)
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
 
-      if (!response) return null;
-
-      // Calculate total questions for the quiz
-      const totalQuestions = response.questions?.questions?.length || 0;
-      
-      return {
-        ...response,
-        isPerfectScore: response.score === totalQuestions
-      };
+      return profile?.is_admin || false;
     },
   });
-
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit?.(quiz);
-  };
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete?.(quiz);
-  };
-
-  const isCompleted = !!quizResponse;
-  const isPerfectScore = quizResponse?.isPerfectScore;
 
   return (
     <Card 
@@ -69,40 +51,18 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
             {quiz.description && (
               <p className="text-slate-300 mt-1">{quiz.description}</p>
             )}
-            <div className="flex items-center gap-2 mt-2">
-              <p className="text-sm text-slate-400">
-                Time limit: {quiz.time_limit || 'No'} minutes
-              </p>
-              <div className="flex items-center gap-1 text-gameGold">
-                <Trophy className="h-4 w-4" />
-                <span className="text-sm">{quiz.points} points</span>
-              </div>
-              {isCompleted && (
-                <span className={`text-sm ${isPerfectScore ? 'text-green-500' : 'text-yellow-500'}`}>
-                  {isPerfectScore ? 'Perfect Score!' : 'Completed'}
-                </span>
-              )}
-            </div>
+            <QuizMetadataDisplay
+              quiz={quiz}
+              isCompleted={isCompleted}
+              isPerfectScore={isPerfectScore}
+            />
           </div>
-          {isAdmin && (
-            <div className="flex gap-2 ml-4">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={handleEdit}
-                className="h-8 w-8"
-              >
-                <Edit2 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="destructive"
-                size="icon"
-                onClick={handleDelete}
-                className="h-8 w-8"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+          {isAdmin && isUserAdmin && onEdit && onDelete && (
+            <QuizAdminActions
+              quiz={quiz}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
           )}
         </div>
       </CardContent>
