@@ -74,7 +74,8 @@ export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit }: QuizLi
       {quizzes.map((quiz) => (
         <Card 
           key={quiz.id} 
-          className="hover:bg-slate-800/90 hover:shadow-md transition-all border border-slate-200"
+          className="hover:bg-slate-800/90 hover:shadow-md transition-all border border-slate-200 cursor-pointer"
+          onClick={() => onEdit?.(quiz)}
         >
           <CardContent className="p-4">
             <div className="flex justify-between items-start">
@@ -88,7 +89,7 @@ export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit }: QuizLi
                 </p>
               </div>
               {isAdmin && (
-                <div className="flex gap-2">
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="outline"
                     size="icon"
