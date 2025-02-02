@@ -56,7 +56,6 @@ export const Leaderboard = () => {
         },
         (payload) => {
           console.log("Received real-time update payload:", payload);
-          console.log("Current leaderboard data before update:", leaderboardData);
           refetch();
           toast({
             title: "Leaderboard Updated",
@@ -72,7 +71,7 @@ export const Leaderboard = () => {
       console.log("Cleaning up real-time subscription...");
       supabase.removeChannel(channel);
     };
-  }, [refetch, toast, leaderboardData]);
+  }, [refetch, toast]);
 
   if (isLoading) {
     return <div>Loading...</div>;

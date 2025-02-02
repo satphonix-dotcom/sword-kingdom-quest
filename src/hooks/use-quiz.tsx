@@ -92,6 +92,7 @@ export const useQuiz = (level: number, quizId?: string) => {
   };
 
   const updateUserPoints = async (pointsToAdd: number) => {
+    console.log("Updating points:", pointsToAdd);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -123,8 +124,9 @@ export const useQuiz = (level: number, quizId?: string) => {
     
     // Check for perfect score (100%)
     if (finalScore === totalQuestions) {
-      // Award points based on the level
-      const pointsToAward = level * 10; // 10 points per level for perfect score
+      // Award points based on the level (10 points per level for perfect score)
+      const pointsToAward = level * 10;
+      console.log("Perfect score! Awarding points:", pointsToAward);
       await updateUserPoints(pointsToAward);
     }
 
@@ -139,6 +141,7 @@ export const useQuiz = (level: number, quizId?: string) => {
     });
 
     if (error) {
+      console.error("Error saving quiz response:", error);
       toast({
         title: "Error",
         description: "Failed to save quiz response",
