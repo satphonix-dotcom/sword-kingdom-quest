@@ -53,6 +53,44 @@ export type Database = {
           },
         ]
       }
+      page_contents: {
+        Row: {
+          content: Json
+          created_at: string
+          created_by: string
+          id: string
+          page_id: Database["public"]["Enums"]["page_identifier"]
+          section_id: string
+          updated_at: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          created_by: string
+          id?: string
+          page_id: Database["public"]["Enums"]["page_identifier"]
+          section_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          page_id?: Database["public"]["Enums"]["page_identifier"]
+          section_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_contents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -224,7 +262,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      page_identifier:
+        | "home"
+        | "about"
+        | "privacy"
+        | "faq"
+        | "study_guide"
+        | "learn_more"
     }
     CompositeTypes: {
       [_ in never]: never
