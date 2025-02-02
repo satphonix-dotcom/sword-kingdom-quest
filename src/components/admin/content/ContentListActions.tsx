@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,9 +21,14 @@ import {
 interface ContentListActionsProps {
   onEdit: () => void;
   onDelete: () => void;
+  isDeleting?: boolean;
 }
 
-export const ContentListActions = ({ onEdit, onDelete }: ContentListActionsProps) => {
+export const ContentListActions = ({ 
+  onEdit, 
+  onDelete,
+  isDeleting 
+}: ContentListActionsProps) => {
   return (
     <div className="flex justify-end items-center gap-2">
       <TooltipProvider>
@@ -33,6 +38,7 @@ export const ContentListActions = ({ onEdit, onDelete }: ContentListActionsProps
               variant="ghost"
               size="icon"
               onClick={onEdit}
+              disabled={isDeleting}
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -51,8 +57,13 @@ export const ContentListActions = ({ onEdit, onDelete }: ContentListActionsProps
                 <Button
                   variant="ghost"
                   size="icon"
+                  disabled={isDeleting}
                 >
-                  <Trash2 className="h-4 w-4 text-destructive" />
+                  {isDeleting ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  )}
                 </Button>
               </AlertDialogTrigger>
             </TooltipTrigger>

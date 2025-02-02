@@ -26,6 +26,7 @@ export const ContentList = ({
 
   const handleDelete = async (id: string) => {
     try {
+      setDeletingId(id);
       const { error } = await supabase
         .from("page_contents")
         .delete()
@@ -44,6 +45,8 @@ export const ContentList = ({
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -77,7 +80,10 @@ export const ContentList = ({
         <TableBody>
           {contents.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
+              <TableCell 
+                colSpan={4} 
+                className="text-center py-4 text-muted-foreground"
+              >
                 No content found. Click "Create Content" to add some.
               </TableCell>
             </TableRow>
@@ -99,6 +105,7 @@ export const ContentList = ({
                   <ContentListActions
                     onEdit={() => onEdit(content)}
                     onDelete={() => handleDelete(content.id)}
+                    isDeleting={deletingId === content.id}
                   />
                 </TableCell>
               </TableRow>
