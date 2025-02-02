@@ -74,7 +74,7 @@ export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit }: QuizLi
       {quizzes.map((quiz) => (
         <Card 
           key={quiz.id} 
-          className="hover:bg-slate-100/90 hover:shadow-md transition-all border border-slate-200"
+          className="hover:bg-slate-800/90 hover:shadow-md transition-all border border-slate-200"
         >
           <CardContent className="p-4">
             <div className="flex justify-between items-start">
