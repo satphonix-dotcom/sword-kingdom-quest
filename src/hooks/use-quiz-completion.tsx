@@ -61,14 +61,21 @@ export const useQuizCompletion = () => {
         return;
       }
 
-      // Calculate points based on score percentage
+      // Get the quiz details to access the points value
+      const { data: quiz } = await supabase
+        .from("quizzes")
+        .select("points")
+        .eq("id", questions[0]?.quiz_id)
+        .single();
+
+      // Calculate points based on score percentage and quiz points
       const scorePercentage = (finalScore / totalQuestions) * 100;
       let pointsToAward = 0;
 
       if (scorePercentage === 100) {
-        pointsToAward = questions[0]?.level * 10;
+        pointsToAward = quiz?.points || 0;
       } else if (scorePercentage >= 70) {
-        pointsToAward = questions[0]?.level * 5;
+        pointsToAward = Math.floor((quiz?.points || 0) / 2);
       }
 
       // Check if a response already exists
