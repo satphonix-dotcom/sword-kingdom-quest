@@ -47,8 +47,6 @@ export const useQuizCompletion = () => {
     selectedAnswer: string | null,
     currentQuestionIndex: number
   ) => {
-    if (hasAttempted) return;
-    
     try {
       const finalScore = score + (selectedAnswer === questions[currentQuestionIndex]?.correct_answer ? 1 : 0);
       const totalQuestions = questions.length;
@@ -83,8 +81,8 @@ export const useQuizCompletion = () => {
       let responseError;
 
       if (existingResponse) {
-        // Update existing response if new score is higher
-        if (finalScore > existingResponse.score) {
+        // Only update if we haven't achieved a perfect score yet
+        if (existingResponse.score < totalQuestions) {
           const { error } = await supabase
             .from("quiz_responses")
             .update({
@@ -98,7 +96,7 @@ export const useQuizCompletion = () => {
             .eq("id", existingResponse.id);
           responseError = error;
         } else {
-          // If existing score is higher or equal, just return the existing score
+          // If we already have a perfect score, don't update
           return existingResponse.score;
         }
       } else {
@@ -129,6 +127,11 @@ export const useQuizCompletion = () => {
 
       if (pointsToAward > 0) {
         await updateUserPoints(pointsToAward, user.id);
+      } else if (scorePercentage < 100) {
+        toast({
+          title: "Keep practicing!",
+          description: "You can retake this quiz to achieve a perfect score.",
+        });
       }
 
       return finalScore;
