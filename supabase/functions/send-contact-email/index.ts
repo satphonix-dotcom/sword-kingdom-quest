@@ -27,7 +27,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send notification to support
     await resend.emails.send({
       from: "Sword Kings <onboarding@resend.dev>",
-      to: "support@swordkings.com",
+      to: "support@gameofswordkings.com",
       subject: `New Contact Form Submission from ${name}`,
       html: `
         <h2>New Contact Form Submission</h2>
