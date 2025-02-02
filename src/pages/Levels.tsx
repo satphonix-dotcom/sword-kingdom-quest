@@ -1,37 +1,29 @@
-import React, { useState } from 'react';
-import { HomeNavigation } from '@/components/home/HomeNavigation';
-import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { LevelSelection } from '@/components/quiz/LevelSelection';
-import { QuizList } from '@/components/quiz/QuizList';
-import { Quiz } from '@/types/quiz';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Quiz } from "@/types/quiz";
+import { QuizList } from "@/components/quiz/QuizList";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 const Levels = () => {
-  const navigate = useNavigate();
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
 
-  const { data: levels, isLoading: isLoadingLevels } = useQuery({
-    queryKey: ['levels'],
+  const { data: levels } = useQuery({
+    queryKey: ["levels"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('levels')
-        .select('*')
-        .order('order_number', { ascending: true });
-      
+        .from("levels")
+        .select("*")
+        .order("order_number");
+
       if (error) throw error;
       return data;
     },
   });
 
-  const { data: quizzes, isLoading: isLoadingQuizzes } = useQuery({
+  const { data: quizzes } = useQuery({
     queryKey: ['quizzes', selectedLevel],
     queryFn: async () => {
-      if (!selectedLevel) return [];
-      
       const { data, error } = await supabase
         .from('quizzes')
         .select(`
@@ -53,65 +45,31 @@ const Levels = () => {
     enabled: !!selectedLevel,
   });
 
-  const handleLevelClick = (levelNumber: number) => {
-    setSelectedLevel(levelNumber);
-  };
-
-  const handleBack = () => {
-    setSelectedLevel(null);
-  };
-
-  const handleQuizEdit = (quiz: Quiz) => {
-    navigate(`/quiz/${quiz.id}`);
-  };
-
-  if (isLoadingLevels) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate">
-        <HomeNavigation />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-gameGold text-center">Loading levels...</div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate">
-      <HomeNavigation />
-      <div className="container mx-auto px-4 py-8">
-        {selectedLevel ? (
-          <div className="max-w-4xl mx-auto">
-            <Button
-              variant="ghost"
-              className="text-gameGold mb-4"
-              onClick={handleBack}
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to Levels
-            </Button>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">
-                  Level {selectedLevel} Quizzes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <QuizList 
-                  quizzes={quizzes}
-                  isLoading={isLoadingQuizzes}
-                  onEdit={handleQuizEdit}
-                />
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <LevelSelection 
-            levels={levels}
-            onLevelClick={handleLevelClick}
-          />
-        )}
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">Levels</h2>
+      <div className="flex flex-col space-y-2">
+        {levels?.map(level => (
+          <button
+            key={level.id}
+            onClick={() => setSelectedLevel(level.order_number)}
+            className="p-2 border rounded"
+          >
+            Level {level.order_number}: {level.title}
+          </button>
+        ))}
       </div>
+
+      {quizzes && quizzes.length > 0 ? (
+        <QuizList quizzes={quizzes} />
+      ) : (
+        <Alert>
+          <AlertTitle>No Quizzes Found</AlertTitle>
+          <AlertDescription>
+            No quizzes available for this level. Please select another level.
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 };

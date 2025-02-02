@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@/components/ui/button";
 import { QuizForm } from "@/components/quiz/QuizForm";
-import { QuizList } from "@/components/quiz/QuizList";
+import { QuizGroupCard } from "@/components/quiz/QuizGroupCard";
+import { QuizManagerHeader } from "@/components/quiz/QuizManagerHeader";
+import { QuizManagerAlerts } from "@/components/quiz/QuizManagerAlerts";
 import { supabase } from "@/integrations/supabase/client";
 import { Quiz } from "@/types/quiz";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export const QuizManager = () => {
   const [showForm, setShowForm] = useState(false);
@@ -89,7 +88,6 @@ export const QuizManager = () => {
     
     const groupedQuizzes = new Map();
     
-    // Initialize map with all levels
     levels.forEach(level => {
       groupedQuizzes.set(level.order_number, {
         levelInfo: level,
@@ -97,7 +95,6 @@ export const QuizManager = () => {
       });
     });
 
-    // Group quizzes by level
     quizzes.forEach(quiz => {
       const level = quiz.questions?.[0]?.level || 1;
       if (groupedQuizzes.has(level)) {
@@ -110,45 +107,20 @@ export const QuizManager = () => {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Quizzes</h2>
-        <Button onClick={() => setShowForm(true)}>Create Quiz</Button>
-      </div>
-
-      {isLoading && (
-        <Alert>
-          <AlertDescription>Loading quizzes...</AlertDescription>
-        </Alert>
-      )}
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>Failed to fetch quizzes. Please try again.</AlertDescription>
-        </Alert>
-      )}
+      <QuizManagerHeader onCreateClick={() => setShowForm(true)} />
+      <QuizManagerAlerts isLoading={isLoading} error={error as Error} />
 
       {quizzes && !isLoading && !error && (
         <div className="space-y-6">
           {Array.from(groupQuizzesByLevel()).map(([levelNumber, { levelInfo, quizzes: levelQuizzes }]) => (
-            <Card key={levelNumber} className="border border-slate-200">
-              <CardHeader>
-                <CardTitle className="text-xl">
-                  Level {levelNumber}: {levelInfo.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {levelQuizzes.length > 0 ? (
-                  <QuizList
-                    quizzes={levelQuizzes}
-                    onQuizzesChange={refetch}
-                    onEdit={handleEdit}
-                  />
-                ) : (
-                  <p className="text-slate-500">No quizzes available for this level.</p>
-                )}
-              </CardContent>
-            </Card>
+            <QuizGroupCard
+              key={levelNumber}
+              levelNumber={levelNumber}
+              levelTitle={levelInfo.title}
+              quizzes={levelQuizzes}
+              onQuizzesChange={refetch}
+              onEdit={handleEdit}
+            />
           ))}
         </div>
       )}
