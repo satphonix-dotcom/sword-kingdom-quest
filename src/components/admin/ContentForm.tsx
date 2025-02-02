@@ -7,9 +7,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ContentFormFields } from "./content/ContentFormFields";
 import { ContentFormActions } from "./content/ContentFormActions";
+import { Database } from "@/integrations/supabase/types";
+
+type PageIdentifier = Database["public"]["Enums"]["page_identifier"];
 
 const contentFormSchema = z.object({
-  page_id: z.string().min(1, "Page is required"),
+  page_id: z.enum([
+    "home",
+    "about",
+    "privacy",
+    "faq",
+    "study_guide",
+    "learn_more",
+    "support",
+    "levels",
+    "quiz",
+    "leaderboard",
+    "profile"
+  ] as const),
   section_id: z.string().min(1, "Section ID is required"),
   content: z.string().min(1, "Content is required"),
 });
@@ -30,10 +45,10 @@ export const ContentForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   
-  const form = useForm({
+  const form = useForm<z.infer<typeof contentFormSchema>>({
     resolver: zodResolver(contentFormSchema),
     defaultValues: {
-      page_id: editContent?.page_id || "",
+      page_id: (editContent?.page_id as PageIdentifier) || "home",
       section_id: editContent?.section_id || "",
       content: editContent?.content ? JSON.stringify(editContent.content) : "",
     },
@@ -68,7 +83,7 @@ export const ContentForm = ({
         section_id: values.section_id,
         content: parsedContent,
         created_by: userId,
-      };
+      } as const;
 
       if (editContent) {
         const { error } = await supabase
