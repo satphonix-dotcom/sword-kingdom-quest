@@ -16,7 +16,7 @@ import Admin from '@/pages/Admin';
 
 function App() {
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-gamePurple to-gameSlate">
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/auth" element={<Auth />} />
@@ -33,7 +33,7 @@ function App() {
         <Route path="/admin" element={<Admin />} />
       </Routes>
       <Toaster />
-    </>
+    </div>
   );
 }
 
