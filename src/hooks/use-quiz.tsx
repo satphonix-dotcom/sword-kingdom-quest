@@ -68,18 +68,19 @@ export const useQuiz = (level: number, quizId?: string) => {
     if (!selectedAnswer || hasAttempted) return;
 
     const isCorrect = selectedAnswer === questions[currentQuestionIndex].correct_answer;
+    let currentScore = score;
     
     if (!showingAnswer) {
       setShowingAnswer(true);
       if (isCorrect) {
-        setScore(score + 1);
+        currentScore = score + 1;
+        setScore(currentScore);
       }
       return;
     }
 
     if (currentQuestionIndex === questions.length - 1) {
-      // Don't add to score again, just complete the quiz with current score
-      const finalScore = await handleQuizComplete(hasAttempted, questions, score, selectedAnswer, currentQuestionIndex);
+      const finalScore = await handleQuizComplete(hasAttempted, questions, currentScore, selectedAnswer, currentQuestionIndex);
       if (finalScore !== null) {
         setScore(finalScore);
         setIsQuizComplete(true);
