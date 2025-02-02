@@ -16,14 +16,19 @@ export const Leaderboard = () => {
   const { data: leaderboardData, isLoading, refetch } = useQuery({
     queryKey: ["leaderboard"],
     queryFn: async () => {
+      console.log("Fetching leaderboard data...");
       const { data, error } = await supabase
         .from("profiles")
         .select("username, points, country, first_name, last_name")
         .order("points", { ascending: false })
         .limit(10);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching leaderboard data:", error);
+        throw error;
+      }
 
+      console.log("Received leaderboard data:", data);
       return data.map((entry, index) => ({
         rank: index + 1,
         name: entry.first_name && entry.last_name
@@ -37,6 +42,7 @@ export const Leaderboard = () => {
 
   // Subscribe to real-time updates on the profiles table
   useEffect(() => {
+    console.log("Setting up real-time subscription...");
     const channel = supabase
       .channel('schema-db-changes')
       .on(
@@ -46,8 +52,8 @@ export const Leaderboard = () => {
           schema: 'public',
           table: 'profiles'
         },
-        () => {
-          // Refetch data when profiles are updated
+        (payload) => {
+          console.log("Received real-time update:", payload);
           refetch();
           toast({
             title: "Leaderboard Updated",
@@ -55,9 +61,12 @@ export const Leaderboard = () => {
           });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
 
     return () => {
+      console.log("Cleaning up real-time subscription...");
       supabase.removeChannel(channel);
     };
   }, [refetch, toast]);
