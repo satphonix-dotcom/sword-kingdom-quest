@@ -22,6 +22,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
   const [title, setTitle] = useState(editQuiz?.title || "");
   const [description, setDescription] = useState(editQuiz?.description || "");
   const [timeLimit, setTimeLimit] = useState(editQuiz?.time_limit?.toString() || "30");
+  const [points, setPoints] = useState(editQuiz?.points?.toString() || "10");
   const [selectedLevel, setSelectedLevel] = useState<number>(1);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -104,6 +105,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
               description,
               created_by: userId,
               time_limit: parseInt(timeLimit),
+              points: parseInt(points),
             },
           ])
           .select()
@@ -119,6 +121,7 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
             title,
             description,
             time_limit: parseInt(timeLimit),
+            points: parseInt(points),
           })
           .eq("id", quizId);
 
@@ -183,6 +186,17 @@ export const QuizForm = ({ userId, onSuccess, onCancel, editQuiz }: QuizFormProp
             placeholder="Time Limit (minutes)"
             value={timeLimit}
             onChange={(e) => setTimeLimit(e.target.value)}
+            required
+            min="1"
+            className="w-full bg-transparent border-gray-700 text-white"
+          />
+        </div>
+        <div className="flex-1">
+          <Input
+            type="number"
+            placeholder="Points"
+            value={points}
+            onChange={(e) => setPoints(e.target.value)}
             required
             min="1"
             className="w-full bg-transparent border-gray-700 text-white"
