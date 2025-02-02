@@ -10,9 +10,10 @@ interface QuizListProps {
   isLoading?: boolean;
   onQuizzesChange?: (options?: RefetchOptions) => Promise<QueryObserverResult<Quiz[], Error>>;
   onEdit?: (quiz: Quiz) => void;
+  onQuizClick?: (quiz: Quiz) => void;
 }
 
-export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit }: QuizListProps) => {
+export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit, onQuizClick }: QuizListProps) => {
   const { toast } = useToast();
 
   const { data: isAdmin } = useQuery({
@@ -70,7 +71,11 @@ export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit }: QuizLi
   return (
     <div className="space-y-4">
       {quizzes.map((quiz) => (
-        <div key={quiz.id} onClick={() => onEdit?.(quiz)}>
+        <div 
+          key={quiz.id} 
+          onClick={() => onQuizClick?.(quiz)}
+          className={onQuizClick ? "cursor-pointer" : undefined}
+        >
           <QuizCard
             quiz={quiz}
             isAdmin={isAdmin}

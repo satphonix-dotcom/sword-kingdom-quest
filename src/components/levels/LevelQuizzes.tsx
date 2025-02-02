@@ -7,9 +7,10 @@ import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
 interface LevelQuizzesProps {
   quizzes: Quiz[] | null;
   onQuizzesChange: (options?: RefetchOptions) => Promise<QueryObserverResult<Quiz[], Error>>;
+  onQuizSelect?: (quizId: string) => void;
 }
 
-export const LevelQuizzes = ({ quizzes, onQuizzesChange }: LevelQuizzesProps) => {
+export const LevelQuizzes = ({ quizzes, onQuizzesChange, onQuizSelect }: LevelQuizzesProps) => {
   if (!quizzes?.length) {
     return (
       <Alert>
@@ -21,5 +22,15 @@ export const LevelQuizzes = ({ quizzes, onQuizzesChange }: LevelQuizzesProps) =>
     );
   }
 
-  return <QuizList quizzes={quizzes} onQuizzesChange={onQuizzesChange} />;
+  const handleQuizClick = (quiz: Quiz) => {
+    onQuizSelect?.(quiz.id);
+  };
+
+  return (
+    <QuizList 
+      quizzes={quizzes} 
+      onQuizzesChange={onQuizzesChange}
+      onQuizClick={handleQuizClick}
+    />
+  );
 };
