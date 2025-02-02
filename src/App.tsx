@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import Levels from '@/pages/Levels';
@@ -15,11 +14,9 @@ import Support from '@/pages/Support';
 import StudyGuide from '@/pages/StudyGuide';
 import Admin from '@/pages/Admin';
 
-const queryClient = new QueryClient();
-
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    <>
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -38,7 +35,7 @@ function App() {
         </Routes>
       </Router>
       <Toaster />
-    </QueryClientProvider>
+    </>
   );
 }
 
