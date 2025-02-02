@@ -2,15 +2,18 @@ import { Quiz } from "@/types/quiz";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit2, Trash2, Trophy } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuizCardProps {
   quiz: Quiz;
-  isAdmin?: boolean;
+  onClick?: () => void;
   onEdit?: (quiz: Quiz) => void;
   onDelete?: (quiz: Quiz) => void;
+  isAdmin?: boolean;
 }
 
-export const QuizCard = ({ quiz, isAdmin, onEdit, onDelete }: QuizCardProps) => {
+export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: QuizCardProps) => {
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     onEdit?.(quiz);
@@ -21,12 +24,28 @@ export const QuizCard = ({ quiz, isAdmin, onEdit, onDelete }: QuizCardProps) => 
     onDelete?.(quiz);
   };
 
-  // Calculate potential points (10 points per level)
-  const potentialPoints = quiz.questions?.[0]?.level ? quiz.questions[0].level * 10 : 0;
+  // Fetch level points based on the quiz's level
+  const { data: levelData } = useQuery({
+    queryKey: ['level', quiz.questions?.[0]?.level],
+    queryFn: async () => {
+      if (!quiz.questions?.[0]?.level) return null;
+      
+      const { data, error } = await supabase
+        .from('levels')
+        .select('points')
+        .eq('order_number', quiz.questions[0].level)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!quiz.questions?.[0]?.level
+  });
 
   return (
     <Card 
       className="hover:bg-slate-800/90 hover:shadow-md transition-all border border-slate-200 cursor-pointer"
+      onClick={onClick}
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
@@ -39,10 +58,12 @@ export const QuizCard = ({ quiz, isAdmin, onEdit, onDelete }: QuizCardProps) => 
               <p className="text-sm text-slate-400">
                 Time limit: {quiz.time_limit || 'No'} minutes
               </p>
-              <div className="flex items-center gap-1 text-gameGold">
-                <Trophy className="h-4 w-4" />
-                <span className="text-sm">{potentialPoints} points</span>
-              </div>
+              {levelData && (
+                <div className="flex items-center gap-1 text-gameGold">
+                  <Trophy className="h-4 w-4" />
+                  <span className="text-sm">{levelData.points} points</span>
+                </div>
+              )}
             </div>
           </div>
           {isAdmin && (
@@ -56,10 +77,10 @@ export const QuizCard = ({ quiz, isAdmin, onEdit, onDelete }: QuizCardProps) => 
                 <Edit2 className="h-4 w-4" />
               </Button>
               <Button
-                variant="outline"
+                variant="destructive"
                 size="icon"
                 onClick={handleDelete}
-                className="h-8 w-8 text-red-500 hover:text-red-600"
+                className="h-8 w-8"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
