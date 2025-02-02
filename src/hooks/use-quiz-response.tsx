@@ -12,6 +12,9 @@ export const useQuizResponse = (quiz: Quiz) => {
   const { data: quizResponse } = useQuery({
     queryKey: ['quizResponse', quiz.id],
     queryFn: async () => {
+      // Don't make the query if we don't have a valid quiz ID
+      if (!quiz.id) return null;
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
@@ -32,6 +35,7 @@ export const useQuizResponse = (quiz: Quiz) => {
         isPerfectScore
       };
     },
+    enabled: !!quiz.id, // Only run the query if we have a quiz ID
   });
 
   return {
