@@ -57,7 +57,7 @@ export const useQuiz = (level: number, quizId?: string) => {
 
   const handleNextQuestion = async () => {
     if (!selectedAnswer || hasAttempted) return;
-
+    
     const isCorrect = selectedAnswer === questions[currentQuestionIndex].correct_answer;
     
     if (!showingAnswer) {

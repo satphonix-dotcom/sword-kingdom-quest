@@ -10,9 +10,12 @@ export const useQuizScore = () => {
     isCorrect: boolean,
     currentScore: number
   ): number => {
-    const newScore = isCorrect ? currentScore + 1 : currentScore;
-    setScore(newScore);
-    return newScore;
+    if (isCorrect) {
+      const newScore = currentScore + 1;
+      setScore(newScore);
+      return newScore;
+    }
+    return currentScore;
   };
 
   const completeQuiz = async (
@@ -22,6 +25,7 @@ export const useQuizScore = () => {
     selectedAnswer: string | null,
     currentQuestionIndex: number
   ) => {
+    // Don't add to score during completion, use the current score
     const finalScore = await handleQuizComplete(
       hasAttempted,
       questions,
@@ -29,6 +33,7 @@ export const useQuizScore = () => {
       selectedAnswer,
       currentQuestionIndex
     );
+    
     if (finalScore !== null) {
       setScore(finalScore);
     }
