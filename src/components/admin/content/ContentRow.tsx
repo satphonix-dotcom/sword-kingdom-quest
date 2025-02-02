@@ -18,11 +18,12 @@ export const ContentRow = ({
 }: ContentRowProps) => {
   const formatContent = (content: any) => {
     try {
+      // If content is already a string, parse it
       if (typeof content === 'string') {
-        const parsed = JSON.parse(content);
-        return parsed.content || JSON.stringify(parsed, null, 2);
+        return JSON.stringify(JSON.parse(content), null, 2);
       }
-      return content.content || JSON.stringify(content, null, 2);
+      // If content is an object, stringify it
+      return JSON.stringify(content, null, 2);
     } catch (e) {
       console.error('Error formatting content:', e);
       return 'Invalid content format';
@@ -54,7 +55,7 @@ export const ContentRow = ({
       <TableCell>{content.section_id}</TableCell>
       <TableCell className="max-w-[400px]">
         <div className="max-h-[100px] overflow-y-auto">
-          <pre className="text-xs whitespace-pre-wrap">
+          <pre className="text-xs whitespace-pre-wrap bg-muted/50 p-2 rounded-md">
             {formatContent(content.content)}
           </pre>
         </div>
