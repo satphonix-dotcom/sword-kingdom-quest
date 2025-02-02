@@ -20,14 +20,22 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
 
-      const { data } = await supabase
+      const { data: response } = await supabase
         .from('quiz_responses')
-        .select('*')
+        .select('*, questions:quizzes(questions(*))')
         .eq('quiz_id', quiz.id)
         .eq('user_id', user.id)
         .maybeSingle();
 
-      return data;
+      if (!response) return null;
+
+      // Calculate total questions for the quiz
+      const totalQuestions = response.questions?.questions?.length || 0;
+      
+      return {
+        ...response,
+        isPerfectScore: response.score === totalQuestions
+      };
     },
   });
 
@@ -42,6 +50,7 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
   };
 
   const isCompleted = !!quizResponse;
+  const isPerfectScore = quizResponse?.isPerfectScore;
 
   return (
     <Card 
@@ -53,7 +62,7 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-semibold text-white">{quiz.title}</h3>
-              {isCompleted && (
+              {isPerfectScore && (
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
               )}
             </div>
@@ -69,8 +78,8 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
                 <span className="text-sm">{quiz.points} points</span>
               </div>
               {isCompleted && (
-                <span className="text-sm text-green-500">
-                  Completed
+                <span className={`text-sm ${isPerfectScore ? 'text-green-500' : 'text-yellow-500'}`}>
+                  {isPerfectScore ? 'Perfect Score!' : 'Completed'}
                 </span>
               )}
             </div>
