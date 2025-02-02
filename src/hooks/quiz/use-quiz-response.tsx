@@ -23,8 +23,18 @@ export const useQuizResponse = () => {
         .maybeSingle();
 
       if (existingResponse) {
-        // Only update if we haven't achieved a perfect score yet
-        if (existingResponse.score < questions.length) {
+        // Check if user already achieved a perfect score
+        if (existingResponse.score >= questions.length) {
+          console.log("Perfect score already achieved, no update needed");
+          toast({
+            title: "Quiz Already Completed",
+            description: "You've already achieved a perfect score on this quiz!",
+          });
+          return existingResponse.score;
+        }
+
+        // Only update if the new score is better than the previous score
+        if (finalScore > existingResponse.score) {
           const { error } = await supabase
             .from("quiz_responses")
             .update({
@@ -47,7 +57,11 @@ export const useQuizResponse = () => {
             return null;
           }
         } else {
-          console.log("Perfect score already achieved, no update needed");
+          console.log("New score not higher than previous score, no update needed");
+          toast({
+            title: "Quiz Score",
+            description: "You need to achieve a higher score to earn more points!",
+          });
           return existingResponse.score;
         }
       } else {
