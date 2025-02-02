@@ -41,6 +41,7 @@ export const useQuizPoints = () => {
           return false;
         }
         
+        console.log(`Successfully awarded points. New total: ${newTotal}`);
         toast({
           title: "Points Awarded!",
           description: `Congratulations! You earned ${pointsToAward} points! New total: ${newTotal}`,
