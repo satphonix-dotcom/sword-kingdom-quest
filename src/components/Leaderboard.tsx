@@ -27,7 +27,7 @@ export const Leaderboard = () => {
         name: entry.first_name && entry.last_name
           ? `${entry.first_name} ${entry.last_name}`
           : entry.username || "Anonymous",
-        score: entry.points,
+        score: entry.points || 0,
         country: entry.country || "Unknown",
       }));
     },
