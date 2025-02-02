@@ -13,7 +13,7 @@ import { HomeLink } from "@/components/HomeLink";
 const Admin = () => {
   const navigate = useNavigate();
   const [currentUserIsAdmin, setCurrentUserIsAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState<'users' | 'quizzes' | 'levels' | 'content'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'quizzes' | 'levels' | 'content'>('content');
   const { toast } = useToast();
 
   useEffect(() => {
