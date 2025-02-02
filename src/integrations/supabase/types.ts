@@ -259,7 +259,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      increment_user_points: {
+        Args: {
+          user_id: string
+          points_to_add: number
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       page_identifier:
