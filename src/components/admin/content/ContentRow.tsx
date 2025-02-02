@@ -18,15 +18,15 @@ export const ContentRow = ({
 }: ContentRowProps) => {
   const formatContent = (content: any) => {
     try {
-      // If content is already a string, parse it
+      // For string content, parse it first
       if (typeof content === 'string') {
         return JSON.stringify(JSON.parse(content), null, 2);
       }
-      // If content is an object, stringify it
+      // For object content, stringify directly
       return JSON.stringify(content, null, 2);
     } catch (e) {
       console.error('Error formatting content:', e);
-      return 'Invalid content format';
+      return String(content); // Convert to string as fallback
     }
   };
 
