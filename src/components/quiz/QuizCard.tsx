@@ -1,5 +1,6 @@
 import { Quiz } from "@/types/quiz";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CheckCircle2 } from "lucide-react";
 import { useQuizResponse } from "@/hooks/use-quiz-response";
 import { QuizMetadataDisplay } from "./QuizMetadataDisplay";
@@ -45,7 +46,10 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
             <div className="flex items-center gap-2">
               <h3 className="text-xl font-semibold text-white">{quiz.title}</h3>
               {isPerfectScore && (
-                <CheckCircle2 className="h-5 w-5 text-green-500" />
+                <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
+                  Completed
+                </Badge>
               )}
             </div>
             {quiz.description && (
