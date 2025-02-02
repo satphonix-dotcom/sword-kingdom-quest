@@ -36,12 +36,19 @@ const Levels = () => {
         .from('quizzes')
         .select(`
           *,
-          questions!inner (level)
+          questions!inner (
+            id,
+            question,
+            correct_answer,
+            options,
+            quiz_id,
+            level
+          )
         `)
         .eq('questions.level', selectedLevel);
       
       if (error) throw error;
-      return data;
+      return data as Quiz[];
     },
     enabled: !!selectedLevel,
   });

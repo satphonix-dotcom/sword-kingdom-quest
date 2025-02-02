@@ -19,7 +19,14 @@ export const QuizManager = () => {
         .from("quizzes")
         .select(`
           *,
-          questions!inner (level)
+          questions!inner (
+            id,
+            question,
+            correct_answer,
+            options,
+            quiz_id,
+            level
+          )
         `)
         .order('created_at', { ascending: false });
 
