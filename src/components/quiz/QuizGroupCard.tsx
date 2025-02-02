@@ -1,12 +1,13 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Quiz } from "@/types/quiz";
 import { QuizList } from "./QuizList";
+import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 
 interface QuizGroupCardProps {
   levelNumber: number;
   levelTitle: string;
   quizzes: Quiz[];
-  onQuizzesChange: () => void;
+  onQuizzesChange: (options?: RefetchOptions) => Promise<QueryObserverResult<Quiz[], Error>>;
   onEdit: (quiz: Quiz) => void;
 }
 
