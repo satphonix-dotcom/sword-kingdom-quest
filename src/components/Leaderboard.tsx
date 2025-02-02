@@ -49,10 +49,9 @@ export const Leaderboard = () => {
       .on(
         'postgres_changes',
         {
-          event: 'UPDATE',
+          event: '*',
           schema: 'public',
           table: 'profiles',
-          filter: `points.gte.0`
         },
         (payload) => {
           console.log("Received real-time update payload:", payload);

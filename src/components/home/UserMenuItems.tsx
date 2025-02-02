@@ -31,7 +31,7 @@ export const UserMenuItems = ({ userPoints: initialPoints, isAdmin, onCloseMenu 
         .on(
           'postgres_changes',
           {
-            event: 'UPDATE',
+            event: '*',
             schema: 'public',
             table: 'profiles',
             filter: `id=eq.${user.id}`
