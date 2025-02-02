@@ -40,16 +40,22 @@ export const LevelManager = () => {
     };
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       if (editingLevel) {
+        // Update existing level
         const { error } = await supabase
           .from("levels")
-          .update(levelData)
+          .update({
+            ...levelData,
+            updated_at: new Date().toISOString(),
+          })
           .eq("id", editingLevel.id);
 
         if (error) throw error;
         toast({ title: "Success", description: "Level updated successfully" });
       } else {
-        const { data: { user } } = await supabase.auth.getUser();
+        // Create new level
         const { error } = await supabase
           .from("levels")
           .insert([{ ...levelData, created_by: user?.id }]);
