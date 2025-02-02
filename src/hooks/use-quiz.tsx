@@ -57,9 +57,18 @@ export const useQuiz = (level: number, quizId?: string) => {
       if (responses) {
         setHasAttempted(true);
         setScore(responses.score || 0);
+        
+        // Wait for questions to be loaded before showing the toast
+        const { data: questionCount } = await supabase
+          .from("questions")
+          .select("id", { count: 'exact' })
+          .eq("quiz_id", quizId);
+          
+        const totalQuestions = questionCount?.length || 0;
+        
         toast({
           title: "Quiz Already Completed",
-          description: `You have already completed this quiz with a score of ${responses.score}/${questions.length}`,
+          description: `You have already completed this quiz with a score of ${responses.score}/${totalQuestions}`,
           variant: "default",
         });
       }
@@ -182,10 +191,8 @@ export const useQuiz = (level: number, quizId?: string) => {
       let pointsToAward = 0;
 
       if (scorePercentage === 100) {
-        // Perfect score bonus: level * 10
         pointsToAward = level * 10;
       } else if (scorePercentage >= 70) {
-        // Passing score: level * 5
         pointsToAward = level * 5;
       }
 
