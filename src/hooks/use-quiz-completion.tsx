@@ -1,15 +1,13 @@
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 import { Question } from "@/types/quiz";
-import { calculatePointsToAward, awardPoints } from "@/utils/quiz-points";
-import { 
-  getExistingResponse, 
-  updateQuizResponse, 
-  createQuizResponse 
-} from "@/utils/quiz-responses";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { useQuizResponse } from "./quiz/use-quiz-response";
+import { useQuizPoints } from "./quiz/use-quiz-points";
 
 export const useQuizCompletion = () => {
   const { toast } = useToast();
+  const { handleQuizResponse } = useQuizResponse();
+  const { handlePointsAward } = useQuizPoints();
 
   const handleQuizComplete = async (
     hasAttempted: boolean,
@@ -32,7 +30,7 @@ export const useQuizCompletion = () => {
           description: "User not found",
           variant: "destructive",
         });
-        return;
+        return null;
       }
 
       // Get the quiz details to access the points value
@@ -49,79 +47,30 @@ export const useQuizCompletion = () => {
           description: "Failed to fetch quiz information",
           variant: "destructive",
         });
-        return;
+        return null;
       }
 
-      const { scorePercentage, pointsToAward } = calculatePointsToAward(
-        finalScore,
-        totalQuestions,
-        quiz?.points
+      // Handle quiz response
+      const responseScore = await handleQuizResponse(
+        questions[0]?.quiz_id,
+        user.id,
+        questions,
+        currentQuestionIndex,
+        selectedAnswer,
+        finalScore
       );
 
-      // Check if a response already exists
-      const existingResponse = await getExistingResponse(questions[0]?.quiz_id, user.id);
-      let responseError;
-
-      if (existingResponse) {
-        // Only update if we haven't achieved a perfect score yet
-        if (existingResponse.score < totalQuestions) {
-          const { error } = await updateQuizResponse(
-            existingResponse.id,
-            questions,
-            currentQuestionIndex,
-            selectedAnswer,
-            finalScore
-          );
-          responseError = error;
-        } else {
-          console.log("Perfect score already achieved, no update needed");
-          return existingResponse.score;
-        }
-      } else {
-        const { error } = await createQuizResponse(
-          questions[0]?.quiz_id,
-          user.id,
-          questions,
-          currentQuestionIndex,
-          selectedAnswer,
-          finalScore
-        );
-        responseError = error;
+      if (responseScore === null) {
+        return null;
       }
 
-      if (responseError) {
-        console.error("Error saving quiz response:", responseError);
-        toast({
-          title: "Error",
-          description: "Failed to save quiz response",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (pointsToAward > 0) {
-        console.log(`Attempting to award ${pointsToAward} points to user ${user.id}`);
-        const { error: pointsError } = await awardPoints(user.id, pointsToAward);
-        if (pointsError) {
-          console.error("Error awarding points:", pointsError);
-          toast({
-            title: "Error",
-            description: "Failed to award points",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Points Awarded!",
-            description: `You earned ${pointsToAward} points!`,
-          });
-        }
-      } else if (scorePercentage < 100) {
-        console.log("Score below 100%, no points awarded");
-        toast({
-          title: "Keep practicing!",
-          description: "You can retake this quiz to achieve a perfect score.",
-        });
-      }
+      // Handle points award
+      await handlePointsAward(
+        user.id,
+        finalScore,
+        totalQuestions,
+        quiz?.points || 0
+      );
 
       return finalScore;
     } catch (error) {
