@@ -52,8 +52,7 @@ export const Leaderboard = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'profiles',
-          filter: 'points=gt.0'
+          table: 'profiles'
         },
         (payload) => {
           console.log("Received real-time update payload:", payload);

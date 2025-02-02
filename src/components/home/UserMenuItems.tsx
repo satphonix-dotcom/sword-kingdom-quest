@@ -17,29 +17,50 @@ export const UserMenuItems = ({ userPoints: initialPoints, isAdmin, onCloseMenu 
   }, [initialPoints]);
 
   useEffect(() => {
-    const channel = supabase
-      .channel('points-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${supabase.auth.getUser().then(({ data }) => data.user?.id)}`
-        },
-        (payload) => {
-          console.log("Points update received:", payload);
-          if (payload.new && 'points' in payload.new) {
-            setPoints(payload.new.points);
+    let userId: string | undefined;
+    
+    // Get the user ID first
+    const setupSubscription = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log("No user found for points subscription");
+        return;
+      }
+      
+      userId = user.id;
+      console.log("Setting up points subscription for user:", userId);
+      
+      const channel = supabase
+        .channel('points-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${userId}`
+          },
+          (payload) => {
+            console.log("Points update received:", payload);
+            if (payload.new && 'points' in payload.new) {
+              console.log("Updating points to:", payload.new.points);
+              setPoints(payload.new.points);
+            }
           }
-        }
-      )
-      .subscribe((status) => {
-        console.log("Points subscription status:", status);
-      });
+        )
+        .subscribe((status) => {
+          console.log("Points subscription status:", status);
+        });
 
+      return () => {
+        console.log("Cleaning up points subscription for user:", userId);
+        supabase.removeChannel(channel);
+      };
+    };
+
+    const cleanup = setupSubscription();
     return () => {
-      supabase.removeChannel(channel);
+      cleanup.then(cleanupFn => cleanupFn && cleanupFn());
     };
   }, []);
 
