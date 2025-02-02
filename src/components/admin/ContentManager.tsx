@@ -13,6 +13,7 @@ export const ContentManager = () => {
   const { data: contents, refetch, isLoading, error } = useQuery({
     queryKey: ["page-contents"],
     queryFn: async () => {
+      console.log("Fetching page contents...");
       const { data, error } = await supabase
         .from("page_contents")
         .select("*")
@@ -22,6 +23,8 @@ export const ContentManager = () => {
         console.error("Error fetching contents:", error);
         throw error;
       }
+      
+      console.log("Fetched contents:", data);
       return data;
     },
   });
