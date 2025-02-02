@@ -1,69 +1,128 @@
-# Welcome to your Lovable project
+# Game of Sword Kings 🗡️👑
 
-## Project info
+A biblical knowledge quiz game that combines learning with competitive gameplay.
 
-**URL**: https://lovable.dev/projects/185e2534-5c3e-4491-9f9d-c8d4cc3ed789
+## Overview
 
-## How can I edit this code?
+Game of Sword Kings is an interactive web application that helps users deepen their understanding of scripture through engaging quizzes and competitive gameplay. Players can test their biblical knowledge, earn points, and compete with others on the global leaderboard.
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- **📚 Biblical Knowledge Quizzes**: Explore scripture through carefully crafted questions spanning both Old and New Testaments
+- **🏆 Points & Achievements**: Earn points as you progress through different difficulty levels
+- **🌍 Global Leaderboard**: Compete with other believers worldwide
+- **👤 User Profiles**: Track your progress and customize your profile
+- **📱 Responsive Design**: Play on any device - mobile, tablet, or desktop
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/185e2534-5c3e-4491-9f9d-c8d4cc3ed789) and start prompting.
+## Tech Stack
 
-Changes made via Lovable will be committed automatically to this repo.
+- **Frontend**: React + TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Backend**: Supabase
+- **Build Tool**: Vite
+- **State Management**: TanStack Query (React Query)
+- **Routing**: React Router
 
-**Use your preferred IDE**
+## Getting Started
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Prerequisites
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- Node.js (v16 or higher)
+- npm or yarn
+- Git
 
-Follow these steps:
+### Installation
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+1. Clone the repository:
+```bash
+git clone <your-repo-url>
+cd game-of-sword-kings
 ```
 
-**Edit a file directly in GitHub**
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+3. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-**Use GitHub Codespaces**
+4. Open [http://localhost:5173](http://localhost:5173) in your browser
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Game Structure
 
-## What technologies are used for this project?
+### Levels
+- **Level 1**: The Basics - Fundamental biblical knowledge
+- **Level 2**: Advanced Concepts - Deeper theological understanding
+- **Level 3**: Expert Challenges - Complex scriptural analysis
 
-This project is built with .
+### Points System
+- Points are awarded based on:
+  - Correct answers
+  - Completion time
+  - Difficulty level
+  - Consecutive correct answers (combo bonus)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Contributing
 
-## How can I deploy this project?
+We welcome contributions! Please follow these steps:
 
-Simply open [Lovable](https://lovable.dev/projects/185e2534-5c3e-4491-9f9d-c8d4cc3ed789) and click on Share -> Publish.
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## I want to use a custom domain - is that possible?
+## Project Structure
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+```
+src/
+├── components/     # Reusable UI components
+├── pages/         # Route components
+├── hooks/         # Custom React hooks
+├── utils/         # Helper functions
+├── types/         # TypeScript type definitions
+└── integrations/  # Third-party integrations
+```
+
+## Environment Variables
+
+The following environment variables are required:
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+## Available Scripts
+
+- `npm run dev`: Start development server
+- `npm run build`: Build for production
+- `npm run preview`: Preview production build
+- `npm run lint`: Run ESLint
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+For support, please:
+- Visit our [FAQ page](/faq)
+- Contact us through the [Support page](/support)
+- Check our [Study Guide](/study-guide) for game tips
+
+## Acknowledgments
+
+- Thanks to all contributors who have helped shape this project
+- Special thanks to our community of players who make this game engaging and competitive
+
+---
+
+Project URL: https://lovable.dev/projects/185e2534-5c3e-4491-9f9d-c8d4cc3ed789
