@@ -9,13 +9,14 @@ export const CsvFormatGuide = ({ className }: CsvFormatGuideProps) => {
       <ul className="list-disc list-inside text-sm text-gray-400 space-y-1">
         <li>File must be in CSV format (.csv)</li>
         <li>Each row must contain exactly 6 columns in this order:</li>
-        <li className="ml-6">1. Question text (maps to question column)</li>
-        <li className="ml-6">2. Correct answer (maps to correct_answer column)</li>
-        <li className="ml-6">3-6. Four options (stored as JSON in options column)</li>
+        <li className="ml-6">1. Question text</li>
+        <li className="ml-6">2. Correct answer</li>
+        <li className="ml-6">3-6. Four options</li>
         <li>The correct answer must be one of the options</li>
         <li>No empty fields are allowed</li>
         <li>Headers are optional (will be skipped if present)</li>
         <li>Example row: What is 2+2?,4,2,3,4,5</li>
+        <li className="text-yellow-400">Important: Remove any trailing commas at the end of each line</li>
       </ul>
     </div>
   );

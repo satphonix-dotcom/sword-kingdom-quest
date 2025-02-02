@@ -39,7 +39,7 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
     reader.onload = async (e) => {
       try {
         const text = e.target?.result as string;
-        // Split by newline and remove empty rows
+        // Split by newline and filter out empty rows
         const rows = text.split('\n')
           .map(row => row.split(','))
           .filter(row => row.length > 0 && row.some(cell => cell.trim().length > 0));
@@ -69,9 +69,11 @@ export const CsvUpload = ({ onQuestionsImported, level = 1 }: CsvUploadProps) =>
           return;
         }
 
-        // Process valid rows into questions that match the database schema
+        // Process valid rows into questions
         const questions: Question[] = dataRows.map(row => {
-          const [question, correctAnswer, ...options] = row.map(cell => cell.trim());
+          // Filter out empty cells that might come from trailing commas
+          const cleanedRow = row.map(cell => cell.trim()).filter(cell => cell.length > 0);
+          const [question, correctAnswer, ...options] = cleanedRow;
           return {
             id: crypto.randomUUID(),
             question,
