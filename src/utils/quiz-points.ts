@@ -5,10 +5,11 @@ export const calculatePointsToAward = (
   totalQuestions: number,
   quizPoints: number = 0
 ) => {
-  const scorePercentage = (finalScore / totalQuestions) * 100;
+  // Ensure score percentage doesn't exceed 100%
+  const scorePercentage = Math.min((finalScore / totalQuestions) * 100, 100);
   console.log(`Score percentage: ${scorePercentage}%`);
   
-  // Only award points for perfect scores
+  // Award points for perfect scores (100%)
   const pointsToAward = scorePercentage === 100 ? quizPoints : 0;
   console.log(`Points to award: ${pointsToAward}`);
   
