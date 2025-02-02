@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { LeaderboardEntry } from "./leaderboard/LeaderboardEntry";
+import { useToast } from "@/hooks/use-toast";
 
 interface LeaderboardData {
   rank: number;
@@ -11,7 +12,8 @@ interface LeaderboardData {
 }
 
 export const Leaderboard = () => {
-  const { data: leaderboardData, isLoading } = useQuery({
+  const { toast } = useToast();
+  const { data: leaderboardData, isLoading, refetch } = useQuery({
     queryKey: ["leaderboard"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,6 +34,33 @@ export const Leaderboard = () => {
       }));
     },
   });
+
+  // Subscribe to real-time updates on the profiles table
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        () => {
+          // Refetch data when profiles are updated
+          refetch();
+          toast({
+            title: "Leaderboard Updated",
+            description: "The scores have been updated.",
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch, toast]);
 
   if (isLoading) {
     return <div>Loading...</div>;
