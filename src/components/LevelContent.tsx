@@ -11,9 +11,10 @@ import { QuizComplete } from "./quiz/QuizComplete";
 interface LevelContentProps {
   level: number;
   onBack: () => void;
+  quizId?: string;
 }
 
-export const LevelContent = ({ level, onBack }: LevelContentProps) => {
+export const LevelContent = ({ level, onBack, quizId }: LevelContentProps) => {
   const { toast } = useToast();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -25,7 +26,7 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
 
   useEffect(() => {
     fetchQuestions();
-  }, [level]);
+  }, [level, quizId]);
 
   useEffect(() => {
     if (timeLeft === null || isQuizComplete) return;
@@ -44,7 +45,7 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
 
   const fetchQuestions = async () => {
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from("questions")
         .select(`
           *,
@@ -52,8 +53,14 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
             time_limit
           )
         `)
-        .eq("level", level)
-        .order("created_at");
+        .eq("level", level);
+
+      // Add quiz ID filter if provided
+      if (quizId) {
+        query.eq("quiz_id", quizId);
+      }
+
+      const { data, error } = await query.order("created_at");
 
       if (error) {
         toast({
@@ -139,7 +146,7 @@ export const LevelContent = ({ level, onBack }: LevelContentProps) => {
     return (
       <Card className="w-full max-w-2xl mx-auto mt-8">
         <CardContent className="p-6">
-          <p className="text-center">No questions available for this level yet.</p>
+          <p className="text-center">No questions available for this quiz yet.</p>
           <Button onClick={onBack} className="mt-4 w-full">
             Go Back
           </Button>

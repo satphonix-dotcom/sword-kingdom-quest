@@ -69,6 +69,7 @@ const Quiz = () => {
       <LevelContent
         level={quiz.questions[0]?.level || 1}
         onBack={handleBack}
+        quizId={quiz.id}
       />
     </div>
   );
