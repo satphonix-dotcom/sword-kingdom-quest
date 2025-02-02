@@ -10,6 +10,7 @@ import {
   Undo,
   Redo
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface WysiwygEditorProps {
   value: string;
@@ -17,12 +18,39 @@ interface WysiwygEditorProps {
 }
 
 export const WysiwygEditor = ({ value, onChange }: WysiwygEditorProps) => {
+  const { toast } = useToast();
+
+  const parseInitialContent = (value: string) => {
+    try {
+      if (!value) return '';
+      const parsed = JSON.parse(value);
+      return parsed.content || '';
+    } catch (e) {
+      console.error('Error parsing initial content:', e);
+      toast({
+        title: "Warning",
+        description: "Invalid content format detected",
+        variant: "destructive",
+      });
+      return '';
+    }
+  };
+
   const editor = useEditor({
     extensions: [StarterKit],
-    content: value ? JSON.parse(value).content : '',
+    content: parseInitialContent(value),
     onUpdate: ({ editor }) => {
-      const json = JSON.stringify({ content: editor.getHTML() });
-      onChange(json);
+      try {
+        const json = JSON.stringify({ content: editor.getHTML() });
+        onChange(json);
+      } catch (e) {
+        console.error('Error updating content:', e);
+        toast({
+          title: "Error",
+          description: "Failed to update content",
+          variant: "destructive",
+        });
+      }
     },
   });
 

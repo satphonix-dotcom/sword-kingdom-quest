@@ -269,6 +269,11 @@ export type Database = {
         | "faq"
         | "study_guide"
         | "learn_more"
+        | "support"
+        | "levels"
+        | "quiz"
+        | "leaderboard"
+        | "profile"
     }
     CompositeTypes: {
       [_ in never]: never

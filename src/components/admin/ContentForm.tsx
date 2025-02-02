@@ -1,10 +1,18 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ContentFormFields } from "./content/ContentFormFields";
 import { ContentFormActions } from "./content/ContentFormActions";
+
+const contentFormSchema = z.object({
+  page_id: z.string().min(1, "Page is required"),
+  section_id: z.string().min(1, "Section ID is required"),
+  content: z.string().min(1, "Content is required"),
+});
 
 interface ContentFormProps {
   userId: string | null;
@@ -23,6 +31,7 @@ export const ContentForm = ({
   const { toast } = useToast();
   
   const form = useForm({
+    resolver: zodResolver(contentFormSchema),
     defaultValues: {
       page_id: editContent?.page_id || "",
       section_id: editContent?.section_id || "",
@@ -30,7 +39,7 @@ export const ContentForm = ({
     },
   });
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: z.infer<typeof contentFormSchema>) => {
     if (!userId) {
       toast({
         title: "Error",
@@ -42,10 +51,22 @@ export const ContentForm = ({
 
     setIsSubmitting(true);
     try {
+      let parsedContent;
+      try {
+        parsedContent = JSON.parse(values.content);
+      } catch (e) {
+        toast({
+          title: "Error",
+          description: "Invalid content format",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const contentData = {
         page_id: values.page_id,
         section_id: values.section_id,
-        content: JSON.parse(values.content),
+        content: parsedContent,
         created_by: userId,
       };
 

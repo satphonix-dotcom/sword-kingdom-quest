@@ -18,11 +18,13 @@ export const ContentRow = ({
   const formatContent = (content: any) => {
     try {
       if (typeof content === 'string') {
-        return JSON.stringify(JSON.parse(content), null, 2);
+        const parsed = JSON.parse(content);
+        return parsed.content || JSON.stringify(parsed, null, 2);
       }
-      return JSON.stringify(content, null, 2);
+      return content.content || JSON.stringify(content, null, 2);
     } catch (e) {
-      return String(content);
+      console.error('Error formatting content:', e);
+      return 'Invalid content format';
     }
   };
 
