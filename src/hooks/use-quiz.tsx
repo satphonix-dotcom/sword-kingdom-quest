@@ -52,6 +52,7 @@ export const useQuiz = (level: number, quizId?: string) => {
       const { data, error } = await query.order("created_at");
 
       if (error) {
+        console.error("Error fetching questions:", error);
         toast({
           title: "Error",
           description: "Failed to fetch questions",
@@ -79,6 +80,7 @@ export const useQuiz = (level: number, quizId?: string) => {
 
       setQuestions(transformedQuestions);
     } catch (error) {
+      console.error("Error in fetchQuestions:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
@@ -92,49 +94,57 @@ export const useQuiz = (level: number, quizId?: string) => {
   };
 
   const updateUserPoints = async (pointsToAdd: number) => {
-    console.log("Attempting to update points:", pointsToAdd);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      console.error('No user found');
-      return;
-    }
+    try {
+      console.log("Starting points update process...");
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.error('No user found for points update');
+        return;
+      }
 
-    const { error } = await supabase.rpc('increment_user_points', {
-      user_id: user.id,
-      points_to_add: pointsToAdd
-    });
+      console.log(`Attempting to award ${pointsToAdd} points to user ${user.id}`);
+      
+      const { error } = await supabase.rpc('increment_user_points', {
+        user_id: user.id,
+        points_to_add: pointsToAdd
+      });
 
-    if (error) {
-      console.error('Error updating points:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update points",
-        variant: "destructive",
-      });
-    } else {
-      console.log(`Successfully awarded ${pointsToAdd} points`);
-      toast({
-        title: "Points Awarded!",
-        description: `You earned ${pointsToAdd} points for your perfect score!`,
-      });
+      if (error) {
+        console.error('Error updating points:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update points",
+          variant: "destructive",
+        });
+      } else {
+        console.log(`Successfully awarded ${pointsToAdd} points to user ${user.id}`);
+        toast({
+          title: "Points Awarded!",
+          description: `You earned ${pointsToAdd} points for your perfect score!`,
+        });
+      }
+    } catch (error) {
+      console.error("Error in updateUserPoints:", error);
     }
   };
 
   const handleQuizComplete = async () => {
-    setIsQuizComplete(true);
-    
-    const finalScore = score + (selectedAnswer === questions[currentQuestionIndex]?.correct_answer ? 1 : 0);
-    const totalQuestions = questions.length;
-    
-    // Check for perfect score (100%)
-    if (finalScore === totalQuestions) {
-      // Award points based on the level (10 points per level for perfect score)
-      const pointsToAward = level * 10;
-      console.log("Perfect score achieved! Awarding points:", pointsToAward);
-      await updateUserPoints(pointsToAward);
-    }
-
     try {
+      setIsQuizComplete(true);
+      
+      const finalScore = score + (selectedAnswer === questions[currentQuestionIndex]?.correct_answer ? 1 : 0);
+      const totalQuestions = questions.length;
+      
+      console.log(`Quiz completed. Final score: ${finalScore}/${totalQuestions}`);
+      
+      // Check for perfect score (100%)
+      if (finalScore === totalQuestions) {
+        const pointsToAward = level * 10;
+        console.log(`Perfect score achieved! Awarding ${pointsToAward} points`);
+        await updateUserPoints(pointsToAward);
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('No user found for quiz response');
@@ -177,7 +187,7 @@ export const useQuiz = (level: number, quizId?: string) => {
     }
 
     if (currentQuestionIndex === questions.length - 1) {
-      handleQuizComplete();
+      await handleQuizComplete();
     } else {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setSelectedAnswer(null);

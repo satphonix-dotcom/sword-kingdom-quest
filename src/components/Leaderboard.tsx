@@ -42,7 +42,6 @@ export const Leaderboard = () => {
     },
   });
 
-  // Subscribe to real-time updates on the profiles table
   useEffect(() => {
     console.log("Setting up real-time subscription...");
     const channel = supabase
