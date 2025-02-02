@@ -1,6 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export const calculatePointsToAward = (finalScore: number, totalQuestions: number, quizPoints: number = 0) => {
+export const calculatePointsToAward = (
+  finalScore: number,
+  totalQuestions: number,
+  quizPoints: number = 0
+) => {
   const scorePercentage = (finalScore / totalQuestions) * 100;
   console.log(`Score percentage: ${scorePercentage}%`);
   
@@ -11,41 +15,77 @@ export const calculatePointsToAward = (finalScore: number, totalQuestions: numbe
   return { scorePercentage, pointsToAward };
 };
 
-export const awardPoints = async (userId: string, pointsToAdd: number): Promise<{ error: any | null }> => {
+export const awardPoints = async (
+  userId: string,
+  pointsToAdd: number
+): Promise<{ success: boolean; error: any | null; newTotal: number | null }> => {
   try {
     if (!userId || pointsToAdd <= 0) {
       console.error('Invalid user ID or points value:', { userId, pointsToAdd });
-      return { error: new Error('Invalid user ID or points value') };
+      return { 
+        success: false, 
+        error: new Error('Invalid user ID or points value'),
+        newTotal: null 
+      };
     }
 
     console.log(`Attempting to award ${pointsToAdd} points to user ${userId}`);
     
-    const { data, error } = await supabase.rpc('increment_user_points', {
+    // Get current points before update
+    const { data: beforeProfile, error: beforeError } = await supabase
+      .from('profiles')
+      .select('points')
+      .eq('id', userId)
+      .single();
+
+    if (beforeError) {
+      console.error('Error fetching current points:', beforeError);
+      return { success: false, error: beforeError, newTotal: null };
+    }
+
+    const beforePoints = beforeProfile?.points || 0;
+    console.log('Current points before update:', beforePoints);
+
+    // Increment points using the database function
+    const { error } = await supabase.rpc('increment_user_points', {
       user_id: userId,
       points_to_add: pointsToAdd
     });
 
     if (error) {
       console.error('Error updating points:', error);
-      return { error };
+      return { success: false, error, newTotal: null };
     }
 
     // Verify the points were actually updated
-    const { data: profile, error: profileError } = await supabase
+    const { data: afterProfile, error: afterError } = await supabase
       .from('profiles')
       .select('points')
       .eq('id', userId)
       .single();
 
-    if (profileError) {
-      console.error('Error verifying points update:', profileError);
-      return { error: profileError };
+    if (afterError) {
+      console.error('Error verifying points update:', afterError);
+      return { success: false, error: afterError, newTotal: null };
     }
 
-    console.log(`Successfully awarded ${pointsToAdd} points to user ${userId}. New total: ${profile.points}`);
-    return { error: null };
+    const afterPoints = afterProfile?.points || 0;
+    console.log(`Points before: ${beforePoints}, after: ${afterPoints}`);
+
+    // Verify the points were actually incremented
+    if (afterPoints !== beforePoints + pointsToAdd) {
+      console.error('Points were not incremented correctly');
+      return { 
+        success: false, 
+        error: new Error('Points increment verification failed'),
+        newTotal: afterPoints 
+      };
+    }
+
+    console.log(`Successfully awarded ${pointsToAdd} points to user ${userId}. New total: ${afterPoints}`);
+    return { success: true, error: null, newTotal: afterPoints };
   } catch (error) {
     console.error("Error in awardPoints:", error);
-    return { error };
+    return { success: false, error, newTotal: null };
   }
 };
