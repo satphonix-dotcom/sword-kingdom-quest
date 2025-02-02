@@ -17,7 +17,8 @@ export const ContentManager = () => {
       const { data, error } = await supabase
         .from("page_contents")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("page_id", { ascending: true })
+        .order("section_id", { ascending: true });
 
       if (error) {
         console.error("Error fetching contents:", error);
