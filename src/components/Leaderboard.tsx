@@ -30,19 +30,18 @@ export const Leaderboard = () => {
 
       console.log("Received raw leaderboard data:", data);
       const transformedData = data.map((entry, index) => {
+        console.log("Processing entry:", entry); // Log each entry for debugging
+
         // First try to use first_name + last_name
         let displayName = "";
-        if (entry.first_name && entry.last_name) {
-          displayName = `${entry.first_name} ${entry.last_name}`;
-        } else if (entry.first_name) {
-          displayName = entry.first_name;
-        } else if (entry.last_name) {
-          displayName = entry.last_name;
-        } else if (entry.username && !entry.username.includes('@')) {
-          // Only use username if it's not an email address
-          displayName = entry.username;
+        if (entry.first_name || entry.last_name) {
+          displayName = [entry.first_name, entry.last_name]
+            .filter(Boolean)
+            .join(" ")
+            .trim();
         } else {
           displayName = "Anonymous";
+          console.log("No name found for entry, using Anonymous:", entry);
         }
 
         return {
