@@ -6,14 +6,13 @@ import { useToast } from "@/hooks/use-toast";
 import { QuizManager } from "@/components/QuizManager";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { LevelManager } from "@/components/admin/LevelManager";
-import { ContentManager } from "@/components/admin/ContentManager";
 import { LogOut } from "lucide-react";
 import { HomeLink } from "@/components/HomeLink";
 
 const Admin = () => {
   const navigate = useNavigate();
   const [currentUserIsAdmin, setCurrentUserIsAdmin] = useState(false);
-  const [activeTab, setActiveTab] = useState<'users' | 'quizzes' | 'levels' | 'content'>('content');
+  const [activeTab, setActiveTab] = useState<'users' | 'quizzes' | 'levels'>('users');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -88,12 +87,6 @@ const Admin = () => {
             >
               Level Management
             </Button>
-            <Button
-              variant={activeTab === 'content' ? 'default' : 'outline'}
-              onClick={() => setActiveTab('content')}
-            >
-              Content Management
-            </Button>
           </div>
           <Button 
             variant="outline" 
@@ -109,7 +102,6 @@ const Admin = () => {
       {activeTab === 'users' && <UserManagement />}
       {activeTab === 'quizzes' && <QuizManager />}
       {activeTab === 'levels' && <LevelManager />}
-      {activeTab === 'content' && <ContentManager />}
     </div>
   );
 };
