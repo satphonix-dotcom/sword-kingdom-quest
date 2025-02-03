@@ -58,9 +58,9 @@ export const SignUpForm = ({
         className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
       />
       {isMobile ? (
-        <MobileCountrySelect value={country} onChange={setCountry} />
+        <MobileCountrySelect country={country} setCountry={setCountry} />
       ) : (
-        <DesktopCountrySelect value={country} onChange={setCountry} />
+        <DesktopCountrySelect country={country} setCountry={setCountry} />
       )}
       <Input
         type="email"
