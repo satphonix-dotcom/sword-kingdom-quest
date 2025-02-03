@@ -109,7 +109,7 @@ const Terms = () => {
                     8. Contact Information
                   </h2>
                   <p className="text-gray-300">
-                    For any questions about these Terms, please contact us at terms@swordkings.com
+                    For any questions about these Terms, please contact us at terms@gameofswordkings.com
                   </p>
                 </section>
               </div>
