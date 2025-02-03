@@ -1,91 +1,10 @@
-import React, { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import React from "react";
 import { LeaderboardEntry } from "./leaderboard/LeaderboardEntry";
-import { useToast } from "@/hooks/use-toast";
-
-interface LeaderboardData {
-  rank: number;
-  name: string;
-  score: number;
-  country: string;
-}
+import { LeaderboardHeader } from "./leaderboard/LeaderboardHeader";
+import { useLeaderboard } from "@/hooks/use-leaderboard";
 
 export const Leaderboard = () => {
-  const { toast } = useToast();
-  const { data: leaderboardData, isLoading, refetch } = useQuery({
-    queryKey: ["leaderboard"],
-    queryFn: async () => {
-      console.log("Fetching leaderboard data...");
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("username, points, country, first_name, last_name")
-        .gt('points', 0) // Only fetch profiles with points greater than 0
-        .order("points", { ascending: false })
-        .limit(10);
-
-      if (error) {
-        console.error("Error fetching leaderboard data:", error);
-        throw error;
-      }
-
-      console.log("Received raw leaderboard data:", data);
-      const transformedData = data.map((entry, index) => {
-        console.log("Processing entry:", entry);
-
-        // First try to use first_name + last_name
-        let displayName = "";
-        if (entry.first_name || entry.last_name) {
-          displayName = [entry.first_name, entry.last_name]
-            .filter(Boolean)
-            .join(" ")
-            .trim();
-        } else {
-          displayName = "Anonymous";
-          console.log("No name found for entry, using Anonymous:", entry);
-        }
-
-        return {
-          rank: index + 1,
-          name: displayName,
-          score: entry.points || 0,
-          country: entry.country || "Unknown",
-        };
-      });
-      console.log("Transformed leaderboard data:", transformedData);
-      return transformedData;
-    },
-  });
-
-  useEffect(() => {
-    console.log("Setting up real-time subscription...");
-    const channel = supabase
-      .channel('points_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles',
-        },
-        (payload) => {
-          console.log("Received real-time update payload:", payload);
-          refetch();
-          toast({
-            title: "Leaderboard Updated",
-            description: "The scores have been updated.",
-          });
-        }
-      )
-      .subscribe((status) => {
-        console.log("Points subscription status:", status);
-      });
-
-    return () => {
-      console.log("Cleaning up real-time subscription...");
-      supabase.removeChannel(channel);
-    };
-  }, [refetch, toast]);
+  const { leaderboardData, isLoading } = useLeaderboard();
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -93,11 +12,9 @@ export const Leaderboard = () => {
 
   return (
     <div className="w-full max-w-md mx-auto bg-white/10 backdrop-blur-md rounded-lg p-4 md:p-6 animate-fade-in">
-      <h2 className="text-xl md:text-2xl font-bold text-gameGold mb-4 text-center">
-        Global Leaderboard
-      </h2>
+      <LeaderboardHeader />
       <div className="space-y-2">
-        {leaderboardData?.map((entry: LeaderboardData) => (
+        {leaderboardData?.map((entry) => (
           <LeaderboardEntry key={entry.rank} {...entry} />
         ))}
       </div>
