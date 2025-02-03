@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { SignUpForm } from "./auth/SignUpForm";
@@ -7,6 +7,7 @@ import { SignInForm } from "./auth/SignInForm";
 import { signUp, signIn } from "@/utils/auth";
 
 export const AuthForm = () => {
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -17,6 +18,11 @@ export const AuthForm = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const mode = searchParams.get("mode");
+    setIsSignUp(mode === "signup");
+  }, [searchParams]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
