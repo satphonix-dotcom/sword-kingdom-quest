@@ -20,6 +20,7 @@ export const Leaderboard = () => {
       const { data, error } = await supabase
         .from("profiles")
         .select("username, points, country, first_name, last_name")
+        .gt('points', 0) // Only fetch profiles with points greater than 0
         .order("points", { ascending: false })
         .limit(10);
 
@@ -30,7 +31,7 @@ export const Leaderboard = () => {
 
       console.log("Received raw leaderboard data:", data);
       const transformedData = data.map((entry, index) => {
-        console.log("Processing entry:", entry); // Log each entry for debugging
+        console.log("Processing entry:", entry);
 
         // First try to use first_name + last_name
         let displayName = "";
