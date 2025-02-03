@@ -10,19 +10,25 @@ export interface LeaderboardEntry {
   country: string;
 }
 
-export const useLeaderboard = () => {
+export const useLeaderboard = (countryFilter?: string) => {
   const { toast } = useToast();
 
   const { data: leaderboardData, isLoading, refetch } = useQuery({
-    queryKey: ["leaderboard"],
+    queryKey: ["leaderboard", countryFilter],
     queryFn: async () => {
       console.log("Fetching leaderboard data...");
-      const { data, error } = await supabase
+      let query = supabase
         .from("profiles")
         .select("username, points, country, first_name, last_name")
         .gt('points', 0)
         .order("points", { ascending: false })
         .limit(10);
+
+      if (countryFilter) {
+        query = query.eq('country', countryFilter);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching leaderboard data:", error);
