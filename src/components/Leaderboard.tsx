@@ -29,14 +29,29 @@ export const Leaderboard = () => {
       }
 
       console.log("Received raw leaderboard data:", data);
-      const transformedData = data.map((entry, index) => ({
-        rank: index + 1,
-        name: entry.first_name && entry.last_name
-          ? `${entry.first_name} ${entry.last_name}`
-          : entry.first_name || entry.last_name || "Anonymous",
-        score: entry.points || 0,
-        country: entry.country || "Unknown",
-      }));
+      const transformedData = data.map((entry, index) => {
+        // First try to use first_name + last_name
+        let displayName = "";
+        if (entry.first_name && entry.last_name) {
+          displayName = `${entry.first_name} ${entry.last_name}`;
+        } else if (entry.first_name) {
+          displayName = entry.first_name;
+        } else if (entry.last_name) {
+          displayName = entry.last_name;
+        } else if (entry.username && !entry.username.includes('@')) {
+          // Only use username if it's not an email address
+          displayName = entry.username;
+        } else {
+          displayName = "Anonymous";
+        }
+
+        return {
+          rank: index + 1,
+          name: displayName,
+          score: entry.points || 0,
+          country: entry.country || "Unknown",
+        };
+      });
       console.log("Transformed leaderboard data:", transformedData);
       return transformedData;
     },
