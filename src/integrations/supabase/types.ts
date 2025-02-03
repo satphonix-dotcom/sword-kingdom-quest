@@ -99,6 +99,7 @@ export type Database = {
           first_name: string | null
           id: string
           is_admin: boolean | null
+          is_restricted: boolean | null
           last_name: string | null
           points: number
           updated_at: string
@@ -111,6 +112,7 @@ export type Database = {
           first_name?: string | null
           id: string
           is_admin?: boolean | null
+          is_restricted?: boolean | null
           last_name?: string | null
           points?: number
           updated_at?: string
@@ -123,6 +125,7 @@ export type Database = {
           first_name?: string | null
           id?: string
           is_admin?: boolean | null
+          is_restricted?: boolean | null
           last_name?: string | null
           points?: number
           updated_at?: string
