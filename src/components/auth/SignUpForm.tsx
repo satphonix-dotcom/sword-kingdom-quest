@@ -1,10 +1,11 @@
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileCountrySelect } from "./country-select/MobileCountrySelect";
 import { DesktopCountrySelect } from "./country-select/DesktopCountrySelect";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface SignUpFormProps {
   firstName: string;
@@ -57,9 +58,9 @@ export const SignUpForm = ({
         className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
       />
       {isMobile ? (
-        <MobileCountrySelect country={country} setCountry={setCountry} />
+        <MobileCountrySelect value={country} onChange={setCountry} />
       ) : (
-        <DesktopCountrySelect country={country} setCountry={setCountry} />
+        <DesktopCountrySelect value={country} onChange={setCountry} />
       )}
       <Input
         type="email"
@@ -95,11 +96,13 @@ export const SignUpForm = ({
           id="terms"
           checked={acceptedTerms}
           onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
-          required
-          className="border-white/30 data-[state=checked]:bg-gameGold data-[state=checked]:text-gamePurple"
+          className="border-white/30 data-[state=checked]:bg-gameGold data-[state=checked]:text-white"
         />
-        <label htmlFor="terms" className="text-sm text-gray-300 cursor-pointer">
-          I accept the terms and conditions *
+        <label htmlFor="terms" className="text-sm text-gray-300">
+          I agree to the{" "}
+          <Link to="/terms" className="text-gameGold hover:underline" target="_blank">
+            Terms and Conditions
+          </Link>
         </label>
       </div>
     </div>

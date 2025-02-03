@@ -13,6 +13,7 @@ import Privacy from '@/pages/Privacy';
 import Support from '@/pages/Support';
 import StudyGuide from '@/pages/StudyGuide';
 import Admin from '@/pages/Admin';
+import Terms from '@/pages/Terms';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
         <Route path="/support" element={<Support />} />
         <Route path="/study-guide" element={<StudyGuide />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/terms" element={<Terms />} />
       </Routes>
       <Toaster />
     </div>
