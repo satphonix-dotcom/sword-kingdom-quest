@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { isMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { MobileCountrySelect } from "../country-select/MobileCountrySelect";
 import { DesktopCountrySelect } from "../country-select/DesktopCountrySelect";
 
@@ -20,7 +20,7 @@ export const PersonalInfoFields = ({
   country,
   setCountry,
 }: PersonalInfoFieldsProps) => {
-  const { isMobile } = useIsMobile();
+  const isMobile = useIsMobile();
 
   return (
     <div className="space-y-4">
