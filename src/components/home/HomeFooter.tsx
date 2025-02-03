@@ -29,6 +29,7 @@ export const HomeFooter = () => {
               <li><Link to="/faq" className="text-gray-300 hover:text-gameGold">FAQ</Link></li>
               <li><Link to="/support" className="text-gray-300 hover:text-gameGold">Support</Link></li>
               <li><Link to="/privacy" className="text-gray-300 hover:text-gameGold">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-gray-300 hover:text-gameGold">Terms & Conditions</Link></li>
             </ul>
           </div>
           <div>
