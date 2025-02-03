@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Database } from "@/integrations/supabase/types";
-import { LogOut, Mail, Globe, Trophy, Calendar, User } from "lucide-react";
+import { LogOut, Mail, Globe, Trophy, Calendar, User, Ban } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -59,6 +59,28 @@ export const UserManagement = () => {
     fetchProfiles();
   };
 
+  const toggleAccessRestriction = async (profileId: string, currentStatus: boolean | null) => {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ is_restricted: !currentStatus })
+      .eq('id', profileId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update access restriction",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Success",
+      description: `User access ${!currentStatus ? 'restricted' : 'restored'} successfully`,
+    });
+    fetchProfiles();
+  };
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -88,7 +110,7 @@ export const UserManagement = () => {
         </TableHeader>
         <TableBody>
           {profiles.map((profile) => (
-            <TableRow key={profile.id}>
+            <TableRow key={profile.id} className={profile.is_restricted ? "opacity-60" : ""}>
               <TableCell>
                 <div className="flex flex-col space-y-1">
                   <span className="font-medium">{profile.username || 'No username'}</span>
@@ -96,9 +118,14 @@ export const UserManagement = () => {
                     <Mail className="h-4 w-4 mr-1" />
                     <span>{profile.id}</span>
                   </div>
-                  <Badge variant={profile.is_admin ? "default" : "secondary"}>
-                    {profile.is_admin ? 'Admin' : 'User'}
-                  </Badge>
+                  <div className="flex gap-2">
+                    <Badge variant={profile.is_admin ? "default" : "secondary"}>
+                      {profile.is_admin ? 'Admin' : 'User'}
+                    </Badge>
+                    {profile.is_restricted && (
+                      <Badge variant="destructive">Restricted</Badge>
+                    )}
+                  </div>
                 </div>
               </TableCell>
               <TableCell>
@@ -135,13 +162,32 @@ export const UserManagement = () => {
                 </div>
               </TableCell>
               <TableCell>
-                <Button
-                  variant={profile.is_admin ? "destructive" : "default"}
-                  onClick={() => toggleAdminStatus(profile.id, profile.is_admin)}
-                  className="w-full"
-                >
-                  {profile.is_admin ? 'Remove Admin' : 'Make Admin'}
-                </Button>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant={profile.is_admin ? "destructive" : "default"}
+                    onClick={() => toggleAdminStatus(profile.id, profile.is_admin)}
+                    className="w-full"
+                  >
+                    {profile.is_admin ? 'Remove Admin' : 'Make Admin'}
+                  </Button>
+                  <Button
+                    variant={profile.is_restricted ? "outline" : "secondary"}
+                    onClick={() => toggleAccessRestriction(profile.id, profile.is_restricted)}
+                    className="w-full"
+                  >
+                    {profile.is_restricted ? (
+                      <>
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Restore Access
+                      </>
+                    ) : (
+                      <>
+                        <Ban className="h-4 w-4 mr-2" />
+                        Restrict Access
+                      </>
+                    )}
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
