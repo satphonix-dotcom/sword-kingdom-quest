@@ -7,6 +7,7 @@ import { QuizMetadataDisplay } from "./QuizMetadataDisplay";
 import { QuizAdminActions } from "./QuizAdminActions";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuizCardProps {
   quiz: Quiz;
@@ -18,6 +19,7 @@ interface QuizCardProps {
 
 export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: QuizCardProps) => {
   const { isCompleted, isPerfectScore } = useQuizResponse(quiz);
+  const { toast } = useToast();
 
   const { data: isUserAdmin } = useQuery({
     queryKey: ["isAdmin"],
@@ -35,10 +37,21 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
     },
   });
 
+  const handleClick = () => {
+    if (isPerfectScore) {
+      toast({
+        title: "Quiz Completed",
+        description: "You've already achieved a perfect score on this quiz!",
+      });
+      return;
+    }
+    onClick?.();
+  };
+
   return (
     <Card 
-      className="hover:bg-slate-800/90 hover:shadow-md transition-all border border-slate-200 cursor-pointer"
-      onClick={onClick}
+      className={`hover:bg-slate-800/90 hover:shadow-md transition-all border border-slate-200 ${!isPerfectScore ? 'cursor-pointer' : 'cursor-not-allowed opacity-75'}`}
+      onClick={handleClick}
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-start">
@@ -48,7 +61,7 @@ export const QuizCard = ({ quiz, onClick, onEdit, onDelete, isAdmin = false }: Q
               {isPerfectScore && (
                 <Badge variant="default" className="bg-green-500 hover:bg-green-600">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Completed
+                  Perfect Score
                 </Badge>
               )}
             </div>
