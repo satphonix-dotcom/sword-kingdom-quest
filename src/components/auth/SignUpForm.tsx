@@ -1,24 +1,8 @@
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { countries } from "@/constants/countries";
-import { useState } from "react";
-import { Input as SearchInput } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { X } from "lucide-react";
+import { MobileCountrySelect } from "./country-select/MobileCountrySelect";
+import { DesktopCountrySelect } from "./country-select/DesktopCountrySelect";
 
 interface SignUpFormProps {
   firstName: string;
@@ -49,102 +33,7 @@ export const SignUpForm = ({
   acceptedTerms,
   setAcceptedTerms,
 }: SignUpFormProps) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
-
-  const filteredCountries = countries.filter((c) =>
-    c.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleCountrySelect = (selectedCountry: string) => {
-    setCountry(selectedCountry);
-    setIsOpen(false);
-    setSearchQuery("");
-  };
-
-  const MobileCountrySelect = () => (
-    <>
-      <Button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        variant="outline"
-        className="w-full h-10 px-3 text-left flex justify-between items-center bg-white/20 border-white/30 text-white"
-      >
-        {country || "Select your country *"}
-      </Button>
-
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-gamePurple border-white/30 text-white">
-          <DialogHeader>
-            <DialogTitle>Select Country</DialogTitle>
-          </DialogHeader>
-          <div className="relative">
-            <SearchInput
-              type="text"
-              placeholder="Search countries..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2 top-1/2 -translate-y-1/2"
-              >
-                <X className="h-4 w-4 text-gray-400" />
-              </button>
-            )}
-          </div>
-          <div className="mt-2 max-h-[300px] overflow-y-auto">
-            {filteredCountries.map((country) => (
-              <button
-                key={country}
-                className="w-full text-left px-3 py-2 hover:bg-white/20 text-white"
-                onClick={() => handleCountrySelect(country)}
-              >
-                {country}
-              </button>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
-  );
-
-  const DesktopCountrySelect = () => (
-    <Select value={country} onValueChange={setCountry} required>
-      <SelectTrigger className="bg-white/20 border-white/30 text-white">
-        <SelectValue placeholder="Select your country *" />
-      </SelectTrigger>
-      <SelectContent
-        position="popper"
-        className="max-h-[200px] bg-gamePurple border-white/30"
-        sideOffset={4}
-      >
-        <div className="p-2 sticky top-0 bg-gamePurple z-10">
-          <SearchInput
-            type="text"
-            placeholder="Search countries..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
-          />
-        </div>
-        <div className="max-h-[300px] overflow-y-auto">
-          {filteredCountries.map((country) => (
-            <SelectItem
-              key={country}
-              value={country}
-              className="text-white hover:bg-white/20"
-            >
-              {country}
-            </SelectItem>
-          ))}
-        </div>
-      </SelectContent>
-    </Select>
-  );
 
   return (
     <div className="space-y-4">
@@ -164,7 +53,11 @@ export const SignUpForm = ({
         required
         className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
       />
-      {isMobile ? <MobileCountrySelect /> : <DesktopCountrySelect />}
+      {isMobile ? (
+        <MobileCountrySelect country={country} setCountry={setCountry} />
+      ) : (
+        <DesktopCountrySelect country={country} setCountry={setCountry} />
+      )}
       <Input
         type="email"
         placeholder="Email *"
