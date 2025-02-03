@@ -10,7 +10,7 @@ interface QuizListProps {
   isLoading?: boolean;
   onQuizzesChange?: (options?: RefetchOptions) => Promise<QueryObserverResult<Quiz[], Error>>;
   onEdit?: (quiz: Quiz) => void;
-  onQuizClick?: (quiz: Quiz) => void;
+  onQuizClick?: (quizId: string) => void;
 }
 
 export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit, onQuizClick }: QuizListProps) => {
@@ -71,18 +71,14 @@ export const QuizList = ({ quizzes, isLoading, onQuizzesChange, onEdit, onQuizCl
   return (
     <div className="space-y-4">
       {quizzes.map((quiz) => (
-        <div 
-          key={quiz.id} 
-          onClick={() => onQuizClick?.(quiz)}
-          className={onQuizClick ? "cursor-pointer" : undefined}
-        >
-          <QuizCard
-            quiz={quiz}
-            isAdmin={isAdmin}
-            onEdit={onEdit}
-            onDelete={handleDelete}
-          />
-        </div>
+        <QuizCard
+          key={quiz.id}
+          quiz={quiz}
+          isAdmin={isAdmin}
+          onEdit={onEdit}
+          onDelete={handleDelete}
+          onClick={() => onQuizClick?.(quiz.id)}
+        />
       ))}
     </div>
   );

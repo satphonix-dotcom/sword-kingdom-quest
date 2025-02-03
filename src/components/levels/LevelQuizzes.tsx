@@ -26,25 +26,11 @@ export const LevelQuizzes = ({ quizzes, onQuizzesChange, onQuizSelect }: LevelQu
     );
   }
 
-  const handleQuizClick = (quiz: Quiz) => {
-    const { isPerfectScore } = useQuizResponse(quiz);
-    
-    if (isPerfectScore) {
-      toast({
-        title: "Quiz Completed",
-        description: "You've already achieved a perfect score on this quiz!",
-      });
-      return;
-    }
-    
-    onQuizSelect?.(quiz.id);
-  };
-
   return (
     <QuizList 
       quizzes={quizzes} 
       onQuizzesChange={onQuizzesChange}
-      onQuizClick={handleQuizClick}
+      onQuizClick={onQuizSelect}
     />
   );
 };
