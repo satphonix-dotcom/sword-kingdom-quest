@@ -68,7 +68,11 @@ export const SignUpForm = ({
         <SelectTrigger className="bg-white/20 border-white/30 text-white">
           <SelectValue placeholder="Select your country *" />
         </SelectTrigger>
-        <SelectContent className="max-h-[200px] bg-gamePurple border-white/30">
+        <SelectContent
+          position="popper"
+          className="max-h-[200px] bg-gamePurple border-white/30"
+          sideOffset={4}
+        >
           <div className="p-2 sticky top-0 bg-gamePurple z-10">
             <SearchInput
               type="text"
