@@ -4,11 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { EditProfileForm } from '@/components/EditProfileForm';
 import { HomeLink } from '@/components/HomeLink';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Profile = () => {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -19,6 +21,8 @@ const Profile = () => {
   const getProfile = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -39,10 +43,17 @@ const Profile = () => {
 
       if (error) {
         console.error('Error fetching profile:', error);
-        throw error;
+        setError(error.message);
+        toast({
+          title: "Error loading profile",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
       }
 
       if (!data) {
+        setError("Profile not found");
         toast({
           title: "Profile not found",
           description: "Unable to load your profile data",
@@ -54,6 +65,7 @@ const Profile = () => {
       setProfile(data);
     } catch (error: any) {
       console.error('Profile loading error:', error);
+      setError(error.message);
       toast({
         title: "Error loading profile",
         description: error.message || "Please try again later.",
@@ -80,7 +92,15 @@ const Profile = () => {
       <HomeLink />
       <div className="max-w-2xl mx-auto mt-16">
         <h1 className="text-3xl font-bold text-gameGold mb-8">Edit Profile</h1>
-        {profile ? (
+        
+        {error ? (
+          <Alert variant="destructive" className="mb-8">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              {error}. Please try refreshing the page or contact support if the issue persists.
+            </AlertDescription>
+          </Alert>
+        ) : profile ? (
           <EditProfileForm
             profile={profile}
             userId={profile.id}
