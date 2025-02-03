@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import {
   Select,
   SelectContent,
@@ -18,6 +19,7 @@ export const DesktopCountrySelect = ({
   setCountry,
 }: DesktopCountrySelectProps) => {
   const { searchQuery, setSearchQuery, filteredCountries } = useCountrySearch();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <Select value={country} onValueChange={setCountry} required>
@@ -31,11 +33,13 @@ export const DesktopCountrySelect = ({
       >
         <div className="p-2 sticky top-0 bg-gamePurple z-10">
           <Input
+            ref={searchInputRef}
             type="text"
             placeholder="Search countries..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
+            onFocus={(e) => e.target.select()}
           />
         </div>
         <div className="max-h-[300px] overflow-y-auto">
