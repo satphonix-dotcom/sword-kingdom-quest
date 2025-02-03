@@ -1,4 +1,6 @@
 import { Input } from "@/components/ui/input";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
 interface SignInFormProps {
   email: string;
@@ -13,6 +15,8 @@ export const SignInForm = ({
   password,
   setPassword,
 }: SignInFormProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <div className="space-y-4">
       <Input
@@ -23,14 +27,27 @@ export const SignInForm = ({
         required
         className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
       />
-      <Input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
-      />
+      <div className="relative">
+        <Input
+          type={showPassword ? "text" : "password"}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          className="bg-white/20 border-white/30 text-white placeholder:text-gray-400"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+        >
+          {showPassword ? (
+            <EyeOff className="h-5 w-5" />
+          ) : (
+            <Eye className="h-5 w-5" />
+          )}
+        </button>
+      </div>
     </div>
   );
 };
